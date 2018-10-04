@@ -1,7 +1,7 @@
 # WCP15-Embedded-Systems-Emualtor
 WCP15 Embedded Systems Emulator
 
-Developers : <name>, <email>
+Developers :<name>,<email>
 
 Seth Arnold, sarnold4@binghamton.edu
 
