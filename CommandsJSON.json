@@ -15,7 +15,7 @@
   "LDR": "Rd = (address)",
   "MCR": "cRn = rRn {<op>cRm}",
   "MLA": "Rd = (Rm * Rs) + Rn",
-  "MOV": "Rd = Op2",
+  "MOVS": "Rd = Op2",
   "MRC": "Rn = cRn {<op>cRm}",
   "MRS": "Rn = PSR",
   "MSR": "PSR = Rm",
