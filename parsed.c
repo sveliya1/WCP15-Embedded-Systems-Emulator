@@ -5,27 +5,43 @@ goto main;
 
 // could not parse: Disassembly of section .text:
 
+
 Label: InterruptVector:
-// could not parse:  0: 00 30 00 20 21 01 00 00 c1 00 00 00 c3 00 00 00 .0. !...........
-// could not parse:  10: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  20: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  30: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  40: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  50: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  60: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  70: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  80: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  90: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  a0: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
-// could not parse:  b0: c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00 ................
+// could not parse:    0:	00 30 00 20 21 01 00 00 c1 00 00 00 c3 00 00 00     .0. !...........
+
+// could not parse:   10:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   20:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   30:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   40:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   50:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   60:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   70:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   80:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   90:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   a0:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
+// could not parse:   b0:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................
+
 
 Label: Default_Handler:
-// could not parse:  c0: e7fe b.n c0 <Default_Handler>
+// could not parse:   c0:	e7fe      	b.n	c0 <Default_Handler>
+
 
 Label: HardFault_Handler:
-// could not parse:  c2: e7fe b.n c2 <HardFault_Handler>
+// could not parse:   c2:	e7fe      	b.n	c2 <HardFault_Handler>
+
 
 Label: _stop_init:
+
 // could not parse:  c4: 2180 movs r1, #128 ; 0x80
 r2, = (address);// c6: 4a10 ldr r2, [pc, #64] ; (108 <_stop_init+0x44>)
 r3, = (address);// c8: 4b10 ldr r3, [pc, #64] ; (10c <_stop_init+0x48>)
@@ -182,12 +198,182 @@ r5, = (address);// 1d8: 58a5 ldr r5, [r4, r2]
 // could not parse:  220: 00000678 .word 0x00000678
 // could not parse:  224: 1ffff000 .word 0x1ffff000
 
-Label: __startup_end:
-// could not parse:  ...
+Rd = Op2// 124:	2288      	movs	r2, #136	; 0x88
+Rd = Op2// 126:	2101      	movs	r1, #1
+Rd = (address)// 128:	4b2e      	ldr	r3, [pc, #184]	; (1e4 <_reset_init+0xc4>)
+// could not parse:  12a:	0152      	lsls	r2, r2, #5
 
+<address> = Rd// 12c:	5099      	str	r1, [r3, r2]
+Rd = (address)// 12e:	482e      	ldr	r0, [pc, #184]	; (1e8 <_reset_init+0xc8>)
+Rd = (address)// 130:	4a2e      	ldr	r2, [pc, #184]	; (1ec <_reset_init+0xcc>)
+<address> = Rd// 132:	6090      	str	r0, [r2, #8]
+Rd = Op2// 134:	2280      	movs	r2, #128	; 0x80
+Rd = (address)// 136:	482e      	ldr	r0, [pc, #184]	; (1f0 <_reset_init+0xd0>)
+// could not parse:  138:	0092      	lsls	r2, r2, #2
+
+Rd = (address)// 13a:	581c      	ldr	r4, [r3, r0]
+// could not parse:  13c:	4322      	orrs	r2, r4
+
+<address> = Rd// 13e:	501a      	str	r2, [r3, r0]
+Rd = (address)// 140:	482c      	ldr	r0, [pc, #176]	; (1f4 <_reset_init+0xd4>)
+Rd = (address)// 142:	4a2d      	ldr	r2, [pc, #180]	; (1f8 <_reset_init+0xd8>)
+<address> = Rd// 144:	5098      	str	r0, [r3, r2]
+Rd = (address)// 146:	681a      	ldr	r2, [r3, #0]
+Rd = (address)// 148:	482c      	ldr	r0, [pc, #176]	; (1fc <_reset_init+0xdc>)
+// could not parse:  14a:	4002      	ands	r2, r0
+
+Rd = Op2// 14c:	2080      	movs	r0, #128	; 0x80
+<address> = Rd// 14e:	601a      	str	r2, [r3, #0]
+Rd = (address)// 150:	4a2b      	ldr	r2, [pc, #172]	; (200 <_reset_init+0xe0>)
+// could not parse:  152:	0240      	lsls	r0, r0, #9
+
+Rd = (address)// 154:	589c      	ldr	r4, [r3, r2]
+// could not parse:  156:	4320      	orrs	r0, r4
+
+<address> = Rd// 158:	5098      	str	r0, [r3, r2]
+Rd = (address)// 15a:	5898      	ldr	r0, [r3, r2]
+Rd = (address)// 15c:	4c29      	ldr	r4, [pc, #164]	; (204 <_reset_init+0xe4>)
+// could not parse:  15e:	4004      	ands	r4, r0
+
+Rd = Op2// 160:	2080      	movs	r0, #128	; 0x80
+// could not parse:  162:	0440      	lsls	r0, r0, #17
+
+// could not parse:  164:	4320      	orrs	r0, r4
+
+<address> = Rd// 166:	5098      	str	r0, [r3, r2]
+Rd = (address)// 168:	4b27      	ldr	r3, [pc, #156]	; (208 <_reset_init+0xe8>)
+Rd = (address)// 16a:	4c28      	ldr	r4, [pc, #160]	; (20c <_reset_init+0xec>)
+Rd = (address)// 16c:	6c98      	ldr	r0, [r3, #72]	; 0x48
+// could not parse:  16e:	4020      	ands	r0, r4
+
+<address> = Rd// 170:	6498      	str	r0, [r3, #72]	; 0x48
+Rd = (address)// 172:	6cda      	ldr	r2, [r3, #76]	; 0x4c
+Rd = Op2// 174:	2000      	movs	r0, #0
+// could not parse:  176:	4022      	ands	r2, r4
+
+<address> = Rd// 178:	64da      	str	r2, [r3, #76]	; 0x4c
+Rd = Op2// 17a:	2224      	movs	r2, #36	; 0x24
+Rd = Op2// 17c:	241f      	movs	r4, #31
+Rd = (address)// 17e:	4b24      	ldr	r3, [pc, #144]	; (210 <_reset_init+0xf0>)
+// could not parse:  180:	7018      	strb	r0, [r3, #0]
+
+Rd = (address)// 182:	4b24      	ldr	r3, [pc, #144]	; (214 <_reset_init+0xf4>)
+// could not parse:  184:	705a      	strb	r2, [r3, #1]
+
+// could not parse:  186:	3274      	adds	r2, #116	; 0x74
+
+// could not parse:  188:	701a      	strb	r2, [r3, #0]
+
+// could not parse:  18a:	78da      	ldrb	r2, [r3, #3]
+
+// could not parse:  18c:	4022      	ands	r2, r4
+
+// could not parse:  18e:	70da      	strb	r2, [r3, #3]
+
+Rd = Op2// 190:	2210      	movs	r2, #16
+// could not parse:  192:	7119      	strb	r1, [r3, #4]
+
+// could not parse:  194:	7158      	strb	r0, [r3, #5]
+
+// could not parse:  196:	7999      	ldrb	r1, [r3, #6]
+
+CPSR flags = Rn AND Op2// 198:	4211      	tst	r1, r2
+// could not parse:  19a:	d1fc      	bne.n	196 <_reset_init+0x76>
+
+Rd = Op2// 19c:	210c      	movs	r1, #12
+// could not parse:  19e:	799a      	ldrb	r2, [r3, #6]
+
+// could not parse:  1a0:	400a      	ands	r2, r1
+
+CPSR flags = Rn - Op2// 1a2:	2a08      	cmp	r2, #8
+// could not parse:  1a4:	d1fb      	bne.n	19e <_reset_init+0x7e>
+
+// could not parse:  1a6:	3238      	adds	r2, #56	; 0x38
+
+// could not parse:  1a8:	715a      	strb	r2, [r3, #5]
+
+// could not parse:  1aa:	7999      	ldrb	r1, [r3, #6]
+
+CPSR flags = Rn AND Op2// 1ac:	4211      	tst	r1, r2
+// could not parse:  1ae:	d0fc      	beq.n	1aa <_reset_init+0x8a>
+
+Rd = Op2// 1b0:	2218      	movs	r2, #24
+Rd = Op2// 1b2:	210c      	movs	r1, #12
+// could not parse:  1b4:	701a      	strb	r2, [r3, #0]
+
+// could not parse:  1b6:	799a      	ldrb	r2, [r3, #6]
+
+// could not parse:  1b8:	400a      	ands	r2, r1
+
+CPSR flags = Rn - Op2// 1ba:	2a0c      	cmp	r2, #12
+// could not parse:  1bc:	d1fb      	bne.n	1b6 <_reset_init+0x96>
+
+Rd = Op2// 1be:	2200      	movs	r2, #0
+Rd = (address)// 1c0:	4815      	ldr	r0, [pc, #84]	; (218 <_reset_init+0xf8>)
+Rd = (address)// 1c2:	4916      	ldr	r1, [pc, #88]	; (21c <_reset_init+0xfc>)
+Rd = (address)// 1c4:	4c16      	ldr	r4, [pc, #88]	; (220 <_reset_init+0x100>)
+// could not parse:  1c6:	1813      	adds	r3, r2, r0
+
+CPSR flags = Rn - Op2// 1c8:	428b      	cmp	r3, r1
+// could not parse:  1ca:	d905      	bls.n	1d8 <_reset_init+0xb8>
+
+Rd = Op2// 1cc:	2100      	movs	r1, #0
+Rd = (address)// 1ce:	4a15      	ldr	r2, [pc, #84]	; (224 <_reset_init+0x104>)
+CPSR flags = Rn - Op2// 1d0:	4293      	cmp	r3, r2
+// could not parse:  1d2:	d905      	bls.n	1e0 <_reset_init+0xc0>
+
+// could not parse:  1d4:	f000 f91c 	bl	410 <main>
+
+Rd = (address)// 1d8:	58a5      	ldr	r5, [r4, r2]
+// could not parse:  1da:	3204      	adds	r2, #4
+
+<address> = Rd// 1dc:	601d      	str	r5, [r3, #0]
+// could not parse:  1de:	e7f2      	b.n	1c6 <_reset_init+0xa6>
+
+// could not parse:  1e0:	c302      	stmia	r3!, {r1}
+
+// could not parse:  1e2:	e7f5      	b.n	1d0 <_reset_init+0xb0>
+
+// could not parse:  1e4:	40047000 	.word	0x40047000
+
+// could not parse:  1e8:	00000000 	.word	0x00000000
+
+// could not parse:  1ec:	e000ed00 	.word	0xe000ed00
+
+// could not parse:  1f0:	00001038 	.word	0x00001038
+
+// could not parse:  1f4:	10010000 	.word	0x10010000
+
+// could not parse:  1f8:	00001044 	.word	0x00001044
+
+// could not parse:  1fc:	fff3ffff 	.word	0xfff3ffff
+
+// could not parse:  200:	00001004 	.word	0x00001004
+
+// could not parse:  204:	fcffffff 	.word	0xfcffffff
+
+// could not parse:  208:	40049000 	.word	0x40049000
+
+// could not parse:  20c:	fefff8ff 	.word	0xfefff8ff
+
+// could not parse:  210:	40065000 	.word	0x40065000
+
+// could not parse:  214:	40064000 	.word	0x40064000
+
+// could not parse:  218:	1ffff000 	.word	0x1ffff000
+
+// could not parse:  21c:	1ffff000 	.word	0x1ffff000
+
+// could not parse:  220:	00000678 	.word	0x00000678
+
+// could not parse:  224:	1ffff000 	.word	0x1ffff000
+
+
+Label: __startup_end:
 
 Label: _cfm:
-// could not parse:  400: ffffffff ffffffff ffffffff fffff77e ............~...
+// could not parse:  400:	ffffffff ffffffff ffffffff fffff77e     ............~...
+
 
 Label: main:
 Stack manipulation (Push);// 410: b510 push {r4, lr}
