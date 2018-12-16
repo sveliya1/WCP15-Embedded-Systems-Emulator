@@ -6,7 +6,7 @@ def getReplaceValue(toReplace,originalSplit):
     toReplaceOriginal = toReplace
  #   try:
     if("ADDRESS" in toReplace):
-        toReplace = originalSplit[0]
+        toReplace = re.sub('[^0-9a-zA-Z]',"",originalSplit[0])
     elif("A" in toReplace):
         index = toReplace.replace("A","")
         toReplace = re.sub('[^0-9a-zA-Z]',"",originalSplit[int(re.sub('[^0-9]','',index)) + 2])
@@ -82,5 +82,3 @@ interprettedFile.write("}")
 interprettedFile.close()
 json_file.close()
 assembly_file.close()
-
-
