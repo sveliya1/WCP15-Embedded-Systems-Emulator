@@ -33,32 +33,32 @@ Label: _stop_init:
 	r0 = Memory[ (r0+r2+0) /8 ] ; // cc: 58d0 ldr r0, [r2, r3]
 	//stack manipulation (Push) ; // ce: b530 push {r4, r5, lr}
 // could not parse:  d0: 4301 orrs r1, r0
-	Memory[ d2 ] = r1 ; // d2: 50d1 str r1, [r2, r3]
+	d2: = r1 ; // d2: 50d1 str r1, [r2, r3]
 	r1 = Memory[ (r1+212+0) /8 ] ; // d4: 490e ldr r1, [pc, #56] ; (110 <_stop_init+0x4c>)
 	r4 = Memory[ (r4+214+0) /8 ] ; // d6: 4c0f ldr r4, [pc, #60] ; (114 <_stop_init+0x50>)
 	r0 = Memory[ (r0+r1+0) /8 ] ; // d8: 6848 ldr r0, [r1, #4]
 // could not parse:  da: 4020 ands r0, r4
-	Memory[ dc ] = r0 ; // dc: 6048 str r0, [r1, #4]
+	dc: = r0 ; // dc: 6048 str r0, [r1, #4]
 // could not parse:  de: 2080 movs r0, #128 ; 0x80
 	r4 = Memory[ (r4+r1+0) /8 ] ; // e0: 684c ldr r4, [r1, #4]
 	r0 = r0 << 1 ; // e2: 0040 lsls r0, r0, #1
 // could not parse:  e4: 4320 orrs r0, r4
-	Memory[ e6 ] = r0 ; // e6: 6048 str r0, [r1, #4]
+	e6: = r0 ; // e6: 6048 str r0, [r1, #4]
 // could not parse:  e8: 2002 movs r0, #2
 	r4 = Memory[ (r4+234+0) /8 ] ; // ea: 4c0b ldr r4, [pc, #44] ; (118 <_stop_init+0x54>)
 	r5 = Memory[ (r5+r4+0) /8 ] ; // ec: 6965 ldr r5, [r4, #20]
 // could not parse:  ee: 4385 bics r5, r0
-	Memory[ f0 ] = r5 ; // f0: 6165 str r5, [r4, #20]
+	f0: = r5 ; // f0: 6165 str r5, [r4, #20]
 	r5 = Memory[ (r5+r1+0) /8 ] ; // f2: 684d ldr r5, [r1, #4]
 // could not parse:  f4: 4305 orrs r5, r0
-	Memory[ f6 ] = r5 ; // f6: 604d str r5, [r1, #4]
+	f6: = r5 ; // f6: 604d str r5, [r1, #4]
 	r1 = Memory[ (r1+r4+0) /8 ] ; // f8: 6921 ldr r1, [r4, #16]
 	cpsr flags = r1 and r0 ; // fa: 4201 tst r1, r0
 // could not parse:  fc: d0fc beq.n f8 <_stop_init+0x34>
 	r1 = Memory[ (r1+r2+0) /8 ] ; // fe: 58d1 ldr r1, [r2, r3]
 	r0 = Memory[ (r0+256+0) /8 ] ; // 100: 4806 ldr r0, [pc, #24] ; (11c <_stop_init+0x58>)
 // could not parse:  102: 4001 ands r1, r0
-	Memory[ 104 ] = r1 ; // 104: 50d1 str r1, [r2, r3]
+	104: = r1 ; // 104: 50d1 str r1, [r2, r3]
 // could not parse:  106: bd30 pop {r4, r5, pc}
 // could not parse:  108: 40047000 .word 0x40047000
 // could not parse:  10c: 00001038 .word 0x00001038
@@ -73,45 +73,45 @@ Label: _reset_init:
 // could not parse:  126: 2101 movs r1, #1
 	r3 = Memory[ (r3+296+0) /8 ] ; // 128: 4b2e ldr r3, [pc, #184] ; (1e4 <_reset_init+0xc4>)
 	r2 = r2 << 5 ; // 12a: 0152 lsls r2, r2, #5
-	Memory[ 12c ] = r1 ; // 12c: 5099 str r1, [r3, r2]
+	12c: = r1 ; // 12c: 5099 str r1, [r3, r2]
 	r0 = Memory[ (r0+302+0) /8 ] ; // 12e: 482e ldr r0, [pc, #184] ; (1e8 <_reset_init+0xc8>)
 	r2 = Memory[ (r2+304+0) /8 ] ; // 130: 4a2e ldr r2, [pc, #184] ; (1ec <_reset_init+0xcc>)
-	Memory[ 132 ] = r0 ; // 132: 6090 str r0, [r2, #8]
+	132: = r0 ; // 132: 6090 str r0, [r2, #8]
 // could not parse:  134: 2280 movs r2, #128 ; 0x80
 	r0 = Memory[ (r0+310+0) /8 ] ; // 136: 482e ldr r0, [pc, #184] ; (1f0 <_reset_init+0xd0>)
 	r2 = r2 << 2 ; // 138: 0092 lsls r2, r2, #2
 	r4 = Memory[ (r4+r3+0) /8 ] ; // 13a: 581c ldr r4, [r3, r0]
 // could not parse:  13c: 4322 orrs r2, r4
-	Memory[ 13e ] = r2 ; // 13e: 501a str r2, [r3, r0]
+	13e: = r2 ; // 13e: 501a str r2, [r3, r0]
 	r0 = Memory[ (r0+320+0) /8 ] ; // 140: 482c ldr r0, [pc, #176] ; (1f4 <_reset_init+0xd4>)
 	r2 = Memory[ (r2+322+0) /8 ] ; // 142: 4a2d ldr r2, [pc, #180] ; (1f8 <_reset_init+0xd8>)
-	Memory[ 144 ] = r0 ; // 144: 5098 str r0, [r3, r2]
+	144: = r0 ; // 144: 5098 str r0, [r3, r2]
 	r2 = Memory[ (r2+r3+0) /8 ] ; // 146: 681a ldr r2, [r3, #0]
 	r0 = Memory[ (r0+328+0) /8 ] ; // 148: 482c ldr r0, [pc, #176] ; (1fc <_reset_init+0xdc>)
 // could not parse:  14a: 4002 ands r2, r0
 // could not parse:  14c: 2080 movs r0, #128 ; 0x80
-	Memory[ 14e ] = r2 ; // 14e: 601a str r2, [r3, #0]
+	14e: = r2 ; // 14e: 601a str r2, [r3, #0]
 	r2 = Memory[ (r2+336+0) /8 ] ; // 150: 4a2b ldr r2, [pc, #172] ; (200 <_reset_init+0xe0>)
 	r0 = r0 << 9 ; // 152: 0240 lsls r0, r0, #9
 	r4 = Memory[ (r4+r3+0) /8 ] ; // 154: 589c ldr r4, [r3, r2]
 // could not parse:  156: 4320 orrs r0, r4
-	Memory[ 158 ] = r0 ; // 158: 5098 str r0, [r3, r2]
+	158: = r0 ; // 158: 5098 str r0, [r3, r2]
 	r0 = Memory[ (r0+r3+0) /8 ] ; // 15a: 5898 ldr r0, [r3, r2]
 	r4 = Memory[ (r4+348+0) /8 ] ; // 15c: 4c29 ldr r4, [pc, #164] ; (204 <_reset_init+0xe4>)
 // could not parse:  15e: 4004 ands r4, r0
 // could not parse:  160: 2080 movs r0, #128 ; 0x80
 	r0 = r0 << 17 ; // 162: 0440 lsls r0, r0, #17
 // could not parse:  164: 4320 orrs r0, r4
-	Memory[ 166 ] = r0 ; // 166: 5098 str r0, [r3, r2]
+	166: = r0 ; // 166: 5098 str r0, [r3, r2]
 	r3 = Memory[ (r3+360+0) /8 ] ; // 168: 4b27 ldr r3, [pc, #156] ; (208 <_reset_init+0xe8>)
 	r4 = Memory[ (r4+362+0) /8 ] ; // 16a: 4c28 ldr r4, [pc, #160] ; (20c <_reset_init+0xec>)
 	r0 = Memory[ (r0+r3+0) /8 ] ; // 16c: 6c98 ldr r0, [r3, #72] ; 0x48
 // could not parse:  16e: 4020 ands r0, r4
-	Memory[ 170 ] = r0 ; // 170: 6498 str r0, [r3, #72] ; 0x48
+	170: = r0 ; // 170: 6498 str r0, [r3, #72] ; 0x48
 	r2 = Memory[ (r2+r3+0) /8 ] ; // 172: 6cda ldr r2, [r3, #76] ; 0x4c
 // could not parse:  174: 2000 movs r0, #0
 // could not parse:  176: 4022 ands r2, r4
-	Memory[ 178 ] = r2 ; // 178: 64da str r2, [r3, #76] ; 0x4c
+	178: = r2 ; // 178: 64da str r2, [r3, #76] ; 0x4c
 // could not parse:  17a: 2224 movs r2, #36 ; 0x24
 // could not parse:  17c: 241f movs r4, #31
 	r3 = Memory[ (r3+382+0) /8 ] ; // 17e: 4b24 ldr r3, [pc, #144] ; (210 <_reset_init+0xf0>)
@@ -160,7 +160,7 @@ Label: _reset_init:
 // could not parse:  1d4: f000 f91c bl 410 <main>
 	r5 = Memory[ (r5+r4+0) /8 ] ; // 1d8: 58a5 ldr r5, [r4, r2]
 // could not parse:  1da: 3204 adds r2, #4
-	Memory[ 1dc ] = r5 ; // 1dc: 601d str r5, [r3, #0]
+	1dc: = r5 ; // 1dc: 601d str r5, [r3, #0]
 // could not parse:  1de: e7f2 b.n 1c6 <_reset_init+0xa6>
 // could not parse:  1e0: c302 stmia r3!, {r1}
 // could not parse:  1e2: e7f5 b.n 1d0 <_reset_init+0xb0>
@@ -224,7 +224,7 @@ Label: toggle_green_led:
 	r3 = r3 << 12 ; // 470: 031b lsls r3, r3, #12
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 472: 68d1 ldr r1, [r2, #12]
 // could not parse:  474: 430b orrs r3, r1
-	Memory[ 476 ] = r3 ; // 476: 60d3 str r3, [r2, #12]
+	476: = r3 ; // 476: 60d3 str r3, [r2, #12]
 	R15 = lr ; T bit = Rn[0] ; // 478: 4770 bx lr
 // could not parse:  47a: 46c0 nop ; (mov r8, r8)
 // could not parse:  47c: 400ff040 .word 0x400ff040
@@ -235,7 +235,7 @@ Label: turn_on_green_led:
 	r3 = r3 << 12 ; // 484: 031b lsls r3, r3, #12
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 486: 6891 ldr r1, [r2, #8]
 // could not parse:  488: 430b orrs r3, r1
-	Memory[ 48a ] = r3 ; // 48a: 6093 str r3, [r2, #8]
+	48a: = r3 ; // 48a: 6093 str r3, [r2, #8]
 	R15 = lr ; T bit = Rn[0] ; // 48c: 4770 bx lr
 // could not parse:  48e: 46c0 nop ; (mov r8, r8)
 // could not parse:  490: 400ff040 .word 0x400ff040
@@ -246,7 +246,7 @@ Label: turn_off_green_led:
 	r3 = r3 << 12 ; // 498: 031b lsls r3, r3, #12
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 49a: 6851 ldr r1, [r2, #4]
 // could not parse:  49c: 430b orrs r3, r1
-	Memory[ 49e ] = r3 ; // 49e: 6053 str r3, [r2, #4]
+	49e: = r3 ; // 49e: 6053 str r3, [r2, #4]
 	R15 = lr ; T bit = Rn[0] ; // 4a0: 4770 bx lr
 // could not parse:  4a2: 46c0 nop ; (mov r8, r8)
 // could not parse:  4a4: 400ff040 .word 0x400ff040
@@ -257,7 +257,7 @@ Label: toggle_red_led:
 	r3 = r3 << 11 ; // 4ac: 02db lsls r3, r3, #11
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 4ae: 68d1 ldr r1, [r2, #12]
 // could not parse:  4b0: 430b orrs r3, r1
-	Memory[ 4b2 ] = r3 ; // 4b2: 60d3 str r3, [r2, #12]
+	4b2: = r3 ; // 4b2: 60d3 str r3, [r2, #12]
 	R15 = lr ; T bit = Rn[0] ; // 4b4: 4770 bx lr
 // could not parse:  4b6: 46c0 nop ; (mov r8, r8)
 // could not parse:  4b8: 400ff040 .word 0x400ff040
@@ -268,7 +268,7 @@ Label: turn_on_red_led:
 	r3 = r3 << 11 ; // 4c0: 02db lsls r3, r3, #11
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 4c2: 6891 ldr r1, [r2, #8]
 // could not parse:  4c4: 430b orrs r3, r1
-	Memory[ 4c6 ] = r3 ; // 4c6: 6093 str r3, [r2, #8]
+	4c6: = r3 ; // 4c6: 6093 str r3, [r2, #8]
 	R15 = lr ; T bit = Rn[0] ; // 4c8: 4770 bx lr
 // could not parse:  4ca: 46c0 nop ; (mov r8, r8)
 // could not parse:  4cc: 400ff040 .word 0x400ff040
@@ -279,7 +279,7 @@ Label: turn_off_red_led:
 	r3 = r3 << 11 ; // 4d4: 02db lsls r3, r3, #11
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 4d6: 6851 ldr r1, [r2, #4]
 // could not parse:  4d8: 430b orrs r3, r1
-	Memory[ 4da ] = r3 ; // 4da: 6053 str r3, [r2, #4]
+	4da: = r3 ; // 4da: 6053 str r3, [r2, #4]
 	R15 = lr ; T bit = Rn[0] ; // 4dc: 4770 bx lr
 // could not parse:  4de: 46c0 nop ; (mov r8, r8)
 // could not parse:  4e0: 400ff040 .word 0x400ff040
@@ -289,7 +289,7 @@ Label: toggle_blue_led:
 	r2 = Memory[ (r2+1254+0) /8 ] ; // 4e6: 4a02 ldr r2, [pc, #8] ; (4f0 <toggle_blue_led+0xc>)
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 4e8: 68d1 ldr r1, [r2, #12]
 // could not parse:  4ea: 430b orrs r3, r1
-	Memory[ 4ec ] = r3 ; // 4ec: 60d3 str r3, [r2, #12]
+	4ec: = r3 ; // 4ec: 60d3 str r3, [r2, #12]
 	R15 = lr ; T bit = Rn[0] ; // 4ee: 4770 bx lr
 // could not parse:  4f0: 400ff0c0 .word 0x400ff0c0
 
@@ -298,7 +298,7 @@ Label: turn_on_blue_led:
 	r2 = Memory[ (r2+1270+0) /8 ] ; // 4f6: 4a02 ldr r2, [pc, #8] ; (500 <turn_on_blue_led+0xc>)
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 4f8: 6891 ldr r1, [r2, #8]
 // could not parse:  4fa: 430b orrs r3, r1
-	Memory[ 4fc ] = r3 ; // 4fc: 6093 str r3, [r2, #8]
+	4fc: = r3 ; // 4fc: 6093 str r3, [r2, #8]
 	R15 = lr ; T bit = Rn[0] ; // 4fe: 4770 bx lr
 // could not parse:  500: 400ff0c0 .word 0x400ff0c0
 
@@ -307,7 +307,7 @@ Label: turn_off_blue_led:
 	r2 = Memory[ (r2+1286+0) /8 ] ; // 506: 4a02 ldr r2, [pc, #8] ; (510 <turn_off_blue_led+0xc>)
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 508: 6851 ldr r1, [r2, #4]
 // could not parse:  50a: 430b orrs r3, r1
-	Memory[ 50c ] = r3 ; // 50c: 6053 str r3, [r2, #4]
+	50c: = r3 ; // 50c: 6053 str r3, [r2, #4]
 	R15 = lr ; T bit = Rn[0] ; // 50e: 4770 bx lr
 // could not parse:  510: 400ff0c0 .word 0x400ff0c0
 
@@ -351,42 +351,42 @@ Label: initialize_rgbled:
 	r0 = Memory[ (r0+r1+0) /8 ] ; // 578: 5888 ldr r0, [r1, r2]
 	//stack manipulation (Push) ; // 57a: b510 push {r4, lr}
 // could not parse:  57c: 4303 orrs r3, r0
-	Memory[ 57e ] = r3 ; // 57e: 508b str r3, [r1, r2]
+	57e: = r3 ; // 57e: 508b str r3, [r1, r2]
 	r3 = Memory[ (r3+1408+0) /8 ] ; // 580: 4b14 ldr r3, [pc, #80] ; (5d4 <initialize_rgbled+0x64>)
 	r0 = Memory[ (r0+1410+0) /8 ] ; // 582: 4815 ldr r0, [pc, #84] ; (5d8 <initialize_rgbled+0x68>)
 	r2 = Memory[ (r2+r3+0) /8 ] ; // 584: 6c9a ldr r2, [r3, #72] ; 0x48
 // could not parse:  586: 4002 ands r2, r0
-	Memory[ 588 ] = r2 ; // 588: 649a str r2, [r3, #72] ; 0x48
+	588: = r2 ; // 588: 649a str r2, [r3, #72] ; 0x48
 // could not parse:  58a: 2280 movs r2, #128 ; 0x80
 	r1 = Memory[ (r1+r3+0) /8 ] ; // 58c: 6c99 ldr r1, [r3, #72] ; 0x48
 	r2 = r2 << 1 ; // 58e: 0052 lsls r2, r2, #1
 // could not parse:  590: 4311 orrs r1, r2
-	Memory[ 592 ] = r1 ; // 592: 6499 str r1, [r3, #72] ; 0x48
+	592: = r1 ; // 592: 6499 str r1, [r3, #72] ; 0x48
 	r1 = Memory[ (r1+r3+0) /8 ] ; // 594: 6cd9 ldr r1, [r3, #76] ; 0x4c
 // could not parse:  596: 4001 ands r1, r0
-	Memory[ 598 ] = r1 ; // 598: 64d9 str r1, [r3, #76] ; 0x4c
+	598: = r1 ; // 598: 64d9 str r1, [r3, #76] ; 0x4c
 	r1 = Memory[ (r1+r3+0) /8 ] ; // 59a: 6cd9 ldr r1, [r3, #76] ; 0x4c
 // could not parse:  59c: 4311 orrs r1, r2
-	Memory[ 59e ] = r1 ; // 59e: 64d9 str r1, [r3, #76] ; 0x4c
+	59e: = r1 ; // 59e: 64d9 str r1, [r3, #76] ; 0x4c
 	r3 = Memory[ (r3+1440+0) /8 ] ; // 5a0: 4b0e ldr r3, [pc, #56] ; (5dc <initialize_rgbled+0x6c>)
 	r1 = Memory[ (r1+r3+0) /8 ] ; // 5a2: 6859 ldr r1, [r3, #4]
 // could not parse:  5a4: 4001 ands r1, r0
-	Memory[ 5a6 ] = r1 ; // 5a6: 6059 str r1, [r3, #4]
+	5a6: = r1 ; // 5a6: 6059 str r1, [r3, #4]
 	r1 = Memory[ (r1+r3+0) /8 ] ; // 5a8: 6859 ldr r1, [r3, #4]
 // could not parse:  5aa: 2000 movs r0, #0
 // could not parse:  5ac: 430a orrs r2, r1
-	Memory[ 5ae ] = r2 ; // 5ae: 605a str r2, [r3, #4]
+	5ae: = r2 ; // 5ae: 605a str r2, [r3, #4]
 // could not parse:  5b0: 23c0 movs r3, #192 ; 0xc0
 	r2 = Memory[ (r2+1458+0) /8 ] ; // 5b2: 4a0b ldr r2, [pc, #44] ; (5e0 <initialize_rgbled+0x70>)
 	r3 = r3 << 12 ; // 5b4: 031b lsls r3, r3, #12
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 5b6: 6951 ldr r1, [r2, #20]
 // could not parse:  5b8: 430b orrs r3, r1
-	Memory[ 5ba ] = r3 ; // 5ba: 6153 str r3, [r2, #20]
+	5ba: = r3 ; // 5ba: 6153 str r3, [r2, #20]
 // could not parse:  5bc: 2302 movs r3, #2
 	r2 = Memory[ (r2+1470+0) /8 ] ; // 5be: 4a09 ldr r2, [pc, #36] ; (5e4 <initialize_rgbled+0x74>)
 	r1 = Memory[ (r1+r2+0) /8 ] ; // 5c0: 6951 ldr r1, [r2, #20]
 // could not parse:  5c2: 430b orrs r3, r1
-	Memory[ 5c4 ] = r3 ; // 5c4: 6153 str r3, [r2, #20]
+	5c4: = r3 ; // 5c4: 6153 str r3, [r2, #20]
 // could not parse:  5c6: f7ff ffa5 bl 514 <set_rgbled_color_to>
 // could not parse:  5ca: bd10 pop {r4, pc}
 // could not parse:  5cc: 40047000 .word 0x40047000
@@ -432,22 +432,22 @@ Label: configure_sw1:
 	r3 = r3 << 2 ; // 622: 009b lsls r3, r3, #2
 	r0 = Memory[ (r0+r1+0) /8 ] ; // 624: 5888 ldr r0, [r1, r2]
 // could not parse:  626: 4303 orrs r3, r0
-	Memory[ 628 ] = r3 ; // 628: 508b str r3, [r1, r2]
+	628: = r3 ; // 628: 508b str r3, [r1, r2]
 	r3 = Memory[ (r3+1578+0) /8 ] ; // 62a: 4b0a ldr r3, [pc, #40] ; (654 <configure_sw1+0x38>)
 	r1 = Memory[ (r1+1580+0) /8 ] ; // 62c: 490a ldr r1, [pc, #40] ; (658 <configure_sw1+0x3c>)
 	r2 = Memory[ (r2+r3+0) /8 ] ; // 62e: 6d1a ldr r2, [r3, #80] ; 0x50
 // could not parse:  630: 400a ands r2, r1
-	Memory[ 632 ] = r2 ; // 632: 651a str r2, [r3, #80] ; 0x50
+	632: = r2 ; // 632: 651a str r2, [r3, #80] ; 0x50
 // could not parse:  634: 2280 movs r2, #128 ; 0x80
 	r1 = Memory[ (r1+r3+0) /8 ] ; // 636: 6d19 ldr r1, [r3, #80] ; 0x50
 	r2 = r2 << 1 ; // 638: 0052 lsls r2, r2, #1
 // could not parse:  63a: 430a orrs r2, r1
-	Memory[ 63c ] = r2 ; // 63c: 651a str r2, [r3, #80] ; 0x50
+	63c: = r2 ; // 63c: 651a str r2, [r3, #80] ; 0x50
 	r2 = Memory[ (r2+1598+0) /8 ] ; // 63e: 4a07 ldr r2, [pc, #28] ; (65c <configure_sw1+0x40>)
 	r1 = Memory[ (r1+1600+0) /8 ] ; // 640: 4907 ldr r1, [pc, #28] ; (660 <configure_sw1+0x44>)
 	r3 = Memory[ (r3+r2+0) /8 ] ; // 642: 6953 ldr r3, [r2, #20]
 // could not parse:  644: 400b ands r3, r1
-	Memory[ 646 ] = r3 ; // 646: 6153 str r3, [r2, #20]
+	646: = r3 ; // 646: 6153 str r3, [r2, #20]
 	R15 = lr ; T bit = Rn[0] ; // 648: 4770 bx lr
 // could not parse:  64a: 46c0 nop ; (mov r8, r8)
 // could not parse:  64c: 40047000 .word 0x40047000

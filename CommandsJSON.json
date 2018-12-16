@@ -1,5 +1,5 @@
 {
-  "ADC": "A1 = A1 + A2 + carryFlag ;",
+  "ADC": "A1 = A1 + A2 + carry ;",
   "ADD": "A1 = A1 + A2 ;",
   "AND": "A1 = A1 and A2 ;",
   "B": "R15 = ADDRESS ;",
@@ -27,7 +27,7 @@
   "SBC": "A1 = A1 - A2 - 1 + Carry ;",
   "STC": "ADDRESS = CA1 ;",
   "PUSH": "//stack manipulation (Push) ;",
-  "STR": "Memory[ <ADDRESS> ] = A1 ;",
+  "STR": "<ADDRESS> = A1 ;",
   "SUB": "A1 = A1 - A2 ;",
   "SWI": "OS call ;",
   "SWP": "A1 = [A1], [A1] := Rm ;",
