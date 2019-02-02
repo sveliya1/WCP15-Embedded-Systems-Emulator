@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2041
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "WCP15-Embedded-Systems-Emualtor", "WCP15-Embedded-Systems-Emualtor.pyproj", "{08B32D67-CA88-4C74-9698-8651F747C225}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{08B32D67-CA88-4C74-9698-8651F747C225}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08B32D67-CA88-4C74-9698-8651F747C225}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C1CAE3F0-5872-4813-A251-BAE47FE5CD72}
+	EndGlobalSection
+EndGlobal

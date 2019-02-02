@@ -36,8 +36,12 @@ def getReplaceValue(toReplace,originalSplit):
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
 json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data.
-assembly_file = open("assignment1_assembly.txt", "r")
+assembly_file = open("timing_demo.txt", "r")
 interprettedFile = open("parsed.c","w")
+interprettedFile.write("#include <stdint.h>\n")
+interprettedFile.write("uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16;\n")
+interprettedFile.write("int result = 0;\n")
+interprettedFile.write("int Memory[2048];\n")
 interprettedFile.write("void main(){\ngoto main;")
 for line in assembly_file:
     #try:
@@ -56,9 +60,26 @@ for line in assembly_file:
             interprettedFile.write("\n")
         elif(len(splitValues) < 3):
             interprettedFile.write("// could not parse: " + line)
-            #interprettedFile.write("\n")
         elif(splitValues[2].upper() in json_data):
             assemblyToCSplit = json_data.get(splitValues[2].upper()).split()
+            assemblyToC = "\t"
+            #assemblyToC = splitValues[2] + " "
+            for toParse in assemblyToCSplit:
+                assemblyToC += getReplaceValue(toParse,splitValues)
+            #if(len(splitValues) >= 4):
+            #    assemblyToC = assemblyToC.replace('A1',splitValues[3])
+            #if(len(splitValues) >= 5):
+            #    if(splitValues[4].contains("#")):
+            #        assemblyToC =
+            #        assemblyToC.replace('A2',splitValues[3].replace("#",""))
+            #    else:
+            #        assemblyToC = assemblyToC.replace('A2',splitValues[3])
+            interprettedFile.write(assemblyToC)
+            interprettedFile.write("//" + line)
+        elif(len(splitValues) < 4):
+            interprettedFile.write("// could not parse: " + line)
+        elif(splitValues[3].upper() in json_data):
+            assemblyToCSplit = json_data.get(splitValues[3].upper()).split()
             assemblyToC = "\t"
             #assemblyToC = splitValues[2] + " "
             for toParse in assemblyToCSplit:
