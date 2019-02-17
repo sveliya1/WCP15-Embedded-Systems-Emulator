@@ -7,6 +7,12 @@ def getReplaceValue(toReplace,originalSplit):
  #   try:
     if("ADDRESS" in toReplace):
         toReplace = re.sub('[^0-9a-zA-Z]',"",originalSplit[0])
+    elif("FUNCTION" in toReplace):
+        for subString in originalSplit:
+            if "<" in subString:
+                toReplace = re.sub("<","",subString)
+                toReplace = re.sub(">","",toReplace)
+                toReplace += "()"
     elif("A" in toReplace):
         index = toReplace.replace("A","")
         toReplace = re.sub('[^0-9a-zA-Z]',"",originalSplit[int(re.sub('[^0-9]','',index)) + 2])
@@ -38,11 +44,11 @@ json_str = json_file.read()             #convert the file into a string
 json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data.
 assembly_file = open("timing_demo.txt", "r")
 interprettedFile = open("parsed.c","w")
-interprettedFile.write("#include <stdint.h>\n")
+interprettedFile.write("#include <stdint.h>\n#include <stdio.h>\n#include <iostream>\n#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\n")
 interprettedFile.write("uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16;\n")
 interprettedFile.write("int result = 0;\n")
 interprettedFile.write("int Memory[2048];\n")
-interprettedFile.write("void main(){\ngoto main;")
+interprettedFile.write("void filler(){\ngoto main;")
 for line in assembly_file:
     #try:
         #lineAlphaNumeric = re.sub(r'([^\s\w]|_)+', ' ', line) #remove
@@ -52,18 +58,23 @@ for line in assembly_file:
         if(len(splitValues) <= 1):
             interprettedFile.write("\n") 
             continue
+        if("<" not in splitValues[1]):
+            interprettedFile.write(splitValues[0]+" \n")
         # Detect Function Header Format: <Function_Header>
         if("<" in splitValues[1]):
             labelHeader = splitValues[1].replace("<","") 
-            labelHeader = labelHeader.replace(">","")
-            interprettedFile.write("Label: " + labelHeader)
+            labelHeader = labelHeader.replace(">:","")
+            labelHeader = "}\nvoid " + labelHeader + "() {"
+            interprettedFile.write(labelHeader)
             interprettedFile.write("\n")
         elif(len(splitValues) < 3):
             interprettedFile.write("// could not parse: " + line)
         elif(splitValues[2].upper() in json_data):
             assemblyToCSplit = json_data.get(splitValues[2].upper()).split()
+            #assemblyToC = assemblyToCSplit[0]+": \n"
             assemblyToC = "\t"
             #assemblyToC = splitValues[2] + " "
+            
             for toParse in assemblyToCSplit:
                 assemblyToC += getReplaceValue(toParse,splitValues)
             #if(len(splitValues) >= 4):

@@ -8,7 +8,7 @@
   "BX": "//R15 = A1 ; \n T bit = Rn[0] ;",
   "CDP": "//(Coprocessor-specific) ;",
   "CMN": "//cpsr flags = A1 + A2 ;",
-  "CMP": "result = A1 - A2",
+  "CMP": "result = A1 - A2 ;",
   "EOR": "A1 = (A1 & NOT A2) | (A2 & NOT A1) ;",
   "LDC": "//Coprocessor load ;",
   "LDM": "//stack manipulation (Pop) ;",
@@ -43,7 +43,7 @@
   "BEQ.N": "if(result == 0){ goto A1 ; }",
   "BNE.N": "if(result != 0){\n    goto A1 ;}",
   "B": "goto A1 ;",
-  "BL": "goto A2 ; //TODO linking ",
+  "BL": "FUNCTION ; ",
   "B.N": "goto A1 ;",
   "BCS.N": "if(!(result & (1 << 31))){ goto A1 ; }"
 }
