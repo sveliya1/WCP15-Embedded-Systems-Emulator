@@ -12,7 +12,8 @@ int main()
 	int a2 = 5;
 	int a3 = 2;
 	int carry = 0;
-	ANDS(a1, a2);
+	bool n_flag, c_flag, v_flag, z_flag;
+	/*ANDS(a1, a2);
 	ADC(a1, a2, carry)
 	ADD(a1, a2) 
 	ADDS(a1, a2)
@@ -53,8 +54,20 @@ int main()
 	BNE
 	BEQ 
 	B
-	BL
-	std::cout << a1;
+	BL*/
+	CMP(a1, a2)
+	EORS(a1, a2);
+
+	std::cout << n_flag;
+	std::cout << "\n";
+	std::cout << c_flag;
+	std::cout << "\n";
+	std::cout << v_flag;
+	std::cout << "\n";
+	std::cout << z_flag;
+	std::cout << "\n";
+
+	//std::cout << a1;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
