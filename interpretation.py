@@ -10,19 +10,21 @@ for x in json_data:
   assemblyList.append(x.lower())
 assembly_file = open("timing_demo.txt", "r")
 interprettedFile = open("parsed.cpp","w")
-interprettedFile.write("#include <stdint.h>\n#include <stdio.h>\n#include <iostream>\n#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\n")
+interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n//#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
 interprettedFile.write("uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16;\n")
+interprettedFile.write("bool n_flag, z_flag, c_flag, v_flag =  false;\n")
 interprettedFile.write("int result = 0;\n")
 interprettedFile.write("int Memory[2048];\n")
-interprettedFile.write("void filler(){\ngoto main;")
+interprettedFile.write("void filler()\n{\n")
 for line in assembly_file:
 	line = line.replace("{","")
+	line = line.replace(".","");
 	line = line.replace("}","")
 	if(len(line.split()) <= 1):
 		continue;
 	else:
 		if(":" in line.split()[0]):
-			interprettedFile.write(line.split()[0] + "  ;\n")
+			interprettedFile.write("label_" + line.split()[0] + "  ;\n")
 	if("<" in line.split()[1]):
 		interprettedFile.write("}\nvoid " + line.split()[1].replace("<","").replace(">:","") + "() \n{")
 		continue;
@@ -45,10 +47,13 @@ for line in assembly_file:
 				if("(" in line.split()[i]):
 					toWrite += "\"" + line.split()[i] + " " + line.split()[i+1]+ "\""
 					break;
+				elif("<" in line.split()[i]):
+					toWrite += "\"" + line.split()[i] + "\" ";
 				elif("r" in line.split()[i]):
 					toWrite += line.split()[i] + " "
 				elif("#" in line.split()[i]):
 					toWrite += line.split()[i].replace("#","")+","
+					
 				else:
 					toWrite += "\"" + line.split()[i].replace(",","") + "\", "
 	if(toWrite != ""):
@@ -57,7 +62,7 @@ for line in assembly_file:
 	else:
 		interprettedFile.write("//Could not parse: " + line + "\n")
 				
-#interprettedFile.write("}")
+interprettedFile.write("}")
 interprettedFile.close()
 json_file.close()
 assembly_file.close()
