@@ -1,23 +1,112 @@
 #include <stdint.h>
+#include "macros.h"
 #include <stdio.h>
 #include <iostream>
-#include "memorymap.h"
+//#include "memorymap.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
 #define DEBUG 1
-uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16;
+using namespace std;
+uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;
+bool n_flag, z_flag, c_flag, v_flag =  false;
 int result = 0;
+void InterruptVector();
+void Default_Handler();
+void HardFault_Handler();
+void _stop_init();
+void _reset_init();
+void __startup_end();
+void _cfm();
+void delay();
+void main();
+void configure_rgbled();
+void turn_on_green_led();
+void turn_off_green_led();
+void toggle_green_led();
+void turn_on_red_led();
+void turn_off_red_led();
+void toggle_red_led();
+void turn_on_blue_led();
+void turn_off_blue_led();
+void toggle_blue_led();
+void set_rgbled_color_to();
 int Memory[2048];
-void filler(){
-goto main;//Could not parse: timing_demo.out:     file format elf32-littlearm ;
-//Could not parse: Disassembly of section .text: ;
-}
-void InterruptVector() 
-{//Could not parse:    0:	00 30 00 20 21 01 00 00 c1 00 00 00 c3 00 00 00     .0. !........... ;
-//Could not parse:   10:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................ ;
-//Could not parse:   20:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................ ;
-//Could not parse:   30:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................ ;
+void filler()
+{
+#include <stdint.h>
+#include "macros.h"
+#include <stdio.h>
+#include <iostream>
+//#include "memorymap.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#define DEBUG 1
+using namespace std;
+uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;
+bool n_flag, z_flag, c_flag, v_flag =  false;
+int result = 0;
+void InterruptVector();
+void Default_Handler();
+void HardFault_Handler();
+void _stop_init();
+void _reset_init();
+void __startup_end();
+void _cfm();
+void delay();
+void main();
+void configure_rgbled();
+void turn_on_green_led();
+void turn_off_green_led();
+void toggle_green_led();
+void turn_on_red_led();
+void turn_off_red_led();
+void toggle_red_led();
+void turn_on_blue_led();
+void turn_off_blue_led();
+void toggle_blue_led();
+void set_rgbled_color_to();
+int Memory[2048];
+void filler()
+{
+#include <stdint.h>
+#include "macros.h"
+#include <stdio.h>
+#include <iostream>
+//#include "memorymap.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#define DEBUG 1
+using namespace std;
+uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;
+bool n_flag, z_flag, c_flag, v_flag =  false;
+int result = 0;
+void InterruptVector();
+void Default_Handler();
+void HardFault_Handler();
+void _stop_init();
+void _reset_init();
+void __startup_end();
+void _cfm();
+void delay();
+void main();
+void configure_rgbled();
+void turn_on_green_led();
+void turn_off_green_led();
+void toggle_green_led();
+void turn_on_red_led();
+void turn_off_red_led();
+void toggle_red_led();
+void turn_on_blue_led();
+void turn_off_blue_led();
+void toggle_blue_led();
+void set_rgbled_color_to();
+int Memory[2048];
+void filler()
+{
+     ................ ;
 //Could not parse:   40:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................ ;
 //Could not parse:   50:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................ ;
 //Could not parse:   60:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00     ................ ;
@@ -410,3 +499,4 @@ BL("4bc", <turn_on_green_led>);// 5c2:	f7ff ff7b 	bl	4bc <turn_on_green_led> ;
 B.N("5aa", <set_rgbled_color_to+0x42>);// 5c6:	e7f0      	b.n	5aa <set_rgbled_color_to+0x42> ;
 BL("534", <turn_on_blue_led>);// 5c8:	f7ff ffb4 	bl	534 <turn_on_blue_led> ;
 B.N("5c2", <set_rgbled_color_to+0x5a>);// 5cc:	e7f9      	b.n	5c2 <set_rgbled_color_to+0x5a> ;
+}

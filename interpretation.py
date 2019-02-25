@@ -2,20 +2,22 @@ import json
 import sys
 import re
 
+def BLInsert(line, BLIndex):
+	for subString in line.split():
+		if("<" in subString):
+			return subString[1:-1]+"( "
+	return "//ERROR PARSING BL "
+
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
 json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data
 assemblyList = []
+functionDec = ""
 for x in json_data:
   assemblyList.append(x.lower())
 assembly_file = open("timing_demo.txt", "r")
 interprettedFile = open("parsed.cpp","w")
-interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n//#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
-interprettedFile.write("uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16;\n")
-interprettedFile.write("bool n_flag, z_flag, c_flag, v_flag =  false;\n")
-interprettedFile.write("int result = 0;\n")
-interprettedFile.write("int Memory[2048];\n")
-interprettedFile.write("void filler()\n{\n")
+
 for line in assembly_file:
 	line = line.replace("{","")
 	line = line.replace(".","");
@@ -26,6 +28,7 @@ for line in assembly_file:
 		if(":" in line.split()[0]):
 			interprettedFile.write("label_" + line.split()[0] + "  ;\n")
 	if("<" in line.split()[1]):
+		functionDec += "void " + line.split()[1].replace("<","").replace(">:","")+"();\n"
 		interprettedFile.write("}\nvoid " + line.split()[1].replace("<","").replace(">:","") + "() \n{")
 		continue;
 	line = line.replace("[","")
@@ -37,6 +40,9 @@ for line in assembly_file:
 	for i in range(len(line.split())):	
 		if(commandFound == 0):
 			if(line.split()[i] in assemblyList):
+				if(line.split()[i] == "bl"):
+					toWrite += BLInsert(line, i);
+					break
 				commandFound = 1
 				toWrite += line.split()[i].upper() + "(";
 		elif(commandFound == 1):
@@ -49,11 +55,10 @@ for line in assembly_file:
 					break;
 				elif("<" in line.split()[i]):
 					toWrite += "\"" + line.split()[i] + "\" ";
-				elif("r" in line.split()[i]):
-					toWrite += line.split()[i] + " "
 				elif("#" in line.split()[i]):
 					toWrite += line.split()[i].replace("#","")+","
-					
+				elif("r" or "pc" in line.split()[i]):
+					toWrite += line.split()[i] + " "
 				else:
 					toWrite += "\"" + line.split()[i].replace(",","") + "\", "
 	if(toWrite != ""):
@@ -64,6 +69,17 @@ for line in assembly_file:
 				
 interprettedFile.write("}")
 interprettedFile.close()
+with open("parsed.cpp", 'r+') as interprettedFile:
+		content = interprettedFile.read()
+		interprettedFile.seek(0)
+		interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n//#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
+		interprettedFile.write("uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;\n")
+		interprettedFile.write("bool n_flag, z_flag, c_flag, v_flag =  false;\n")
+		interprettedFile.write("int result = 0;\n")
+		interprettedFile.write(functionDec)
+		interprettedFile.write("int Memory[2048];\n")
+		interprettedFile.write("void filler()\n{\n")
+		interprettedFile.write(content)
 json_file.close()
 assembly_file.close()
 

@@ -1,4 +1,4 @@
-from capstone import *
+#from capstone import *
 with open("assignment1.srec","rb") as f:
 	CODE = f.read()
 md = Cs(CS_ARCH_ARM, CS_MODE_ARM)
