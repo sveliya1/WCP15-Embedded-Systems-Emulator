@@ -23,6 +23,7 @@
     <Content Include="assignment2_assembly.txt" />
     <Content Include="CommandsJSON.json" />
     <Content Include="parsed.c" />
+    <Content Include="parsed.cpp" />
     <Content Include="timing_demo.txt" />
   </ItemGroup>
   <ItemGroup>
