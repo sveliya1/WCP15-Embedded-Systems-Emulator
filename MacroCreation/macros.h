@@ -108,7 +108,7 @@ g_cycle_count += 1;\
 	result = Rd - Rn;\
 	N_flag = (result & (1 & 31));\
 	Z_flag = (result == 0);\
-	C_flag = !(operand2 > operand1);\
+	C_flag = !(Rn > Rd);\
 	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 	g_cycle_count += 1;\
 }
@@ -116,7 +116,7 @@ g_cycle_count += 1;\
 	result = Rd - ~Rn;\
 	N_flag = (result & (1 & 31));\
 	Z_flag = (result == 0);\
-	C_flag = !(operand2 > operand1);\
+	C_flag = !(Rn > Rd);\
 	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 	g_cycle_count += 1;\
 }
@@ -269,7 +269,7 @@ g_cycle_count += 1;\
 result = Rn - Rd;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rd > Rn);\
 V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
@@ -278,7 +278,7 @@ g_cycle_count += 1;\
 result = Rm - Rn;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rn > Rm);\
 V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
@@ -291,7 +291,7 @@ g_cycle_count += 1;\
 result = Rd - Rn - C_flag;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rn > Rd);\
 V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
@@ -300,7 +300,7 @@ g_cycle_count += 1;\
 result = Rn - Rm - C_flag;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rm > Rn);\
 V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
