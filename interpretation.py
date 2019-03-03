@@ -8,13 +8,19 @@ def BLInsert(line, BLIndex):
 			return subString[1:-1]+"( "
 	return "//ERROR PARSING BL "
 
+def BranchInsert(line, BIndex):
+	return(" goto(label_" + line.split()[BIndex + 1] + " ")
+	return "\\ERROR PARSING BRANCH"
+
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
 json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data
 assemblyList = []
+branchesList = ["b","bn","bne"]
 functionDec = ""
 for x in json_data:
   assemblyList.append(x.lower())
+assemblyList.extend(branchesList)
 assembly_file = open("timing_demo.txt", "r")
 interprettedFile = open("parsed.cpp","w")
 
@@ -43,6 +49,9 @@ for line in assembly_file:
 				if(line.split()[i] == "bl"):
 					toWrite += BLInsert(line, i);
 					break
+				elif(line.split()[i] in branchesList):
+					toWrite += BranchInsert(line, i)
+					break;
 				commandFound = 1
 				toWrite += line.split()[i].upper() + "(";
 		elif(commandFound == 1):
