@@ -15,8 +15,12 @@ def BranchInsert(line, BIndex):
 def findLine(lineNumber):
 	global assemblyContents
 	for line in assemblyContents:
-		if(line.split()[i] == lineNumber):
-			return line
+		try:
+			if(line.split()[0] == (lineNumber.replace("(","")+":")):
+				return line
+		except:
+			print("empty line?")
+	return ""
 
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
@@ -48,8 +52,8 @@ for line in assembly_file:
 		functionDec += "void " + line.split()[1].replace("<","").replace(">:","")+"();\n"
 		interprettedFile.write("}\nvoid " + line.split()[1].replace("<","").replace(">:","") + "() \n{")
 		continue;
-	line = line.replace("[","")
-	line = line.replace("]","")
+	#line = line.replace("[","")
+	#line = line.replace("]","")
 	toWrite = ""
 	commandFound = 0
 	line = line.replace(";"," ;")
@@ -58,13 +62,12 @@ for line in assembly_file:
 		addParentheses = True
 		if(commandFound == 0):
 			if(line.split()[i].upper() in bjson_data.keys()):
-				if(line.split()[i] == "bl"):
-					
+				if(line.split()[i] == "bl"):					
 					toWrite += BLInsert(line, i);
 					break
 				else:
 					toWrite += bjson_data[line.split()[i].upper()]
-					toWrite += BranchInsert(line, i)
+					toWrite += BranchInsert(line, i) +"; "
 					toWrite += "} "
 					addParentheses = False;
 					break;
@@ -79,12 +82,15 @@ for line in assembly_file:
 				if("(" in line.split()[i]):
 					toWrite += "\"" + line.split()[i] + " " + line.split()[i+1]+ "\""
 					break;
+				elif("[" in line.split()[i] and "ldr" in line.split() and "pc" in line):
+					toWrite += findLine(line.split()[-3]).split()[-1]
+					break;
 				elif("<" in line.split()[i]):
 					toWrite += "\"" + line.split()[i] + "\" ";
 				elif("#" in line.split()[i]):
-					toWrite += line.split()[i].replace("#","")+","
+					toWrite += line.split()[i].replace("#","").replace("[","").replace("]","") +","
 				elif("r" or "pc" in line.split()[i]):
-					toWrite += line.split()[i] + " "
+					toWrite += line.split()[i].replace("[","").replace("]","") + " "
 				else:
 					toWrite += "\"" + line.split()[i].replace(",","") + "\", "
 	if(toWrite != ""):
@@ -103,8 +109,9 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.seek(0)
 		interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n//#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
 		interprettedFile.write("int r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;\n")
-		interprettedFile.write("bool n_flag, z_flag, c_flag, v_flag =  false;\n")
+		interprettedFile.write("bool N_flag, Z_flag, C_flag, V_flag =  false;\n")
 		interprettedFile.write("int result = 0;\n")
+		interprettedFile.write("int g_cycle_count = 0;\n")
 		interprettedFile.write(functionDec)
 		interprettedFile.write("int Memory[2048];\n")
 		interprettedFile.write("void filler()\n{\n")
