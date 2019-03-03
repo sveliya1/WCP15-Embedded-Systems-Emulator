@@ -66,11 +66,11 @@ label_b0:  ;
 }
 void Default_Handler() 
 {label_c0:  ;
- goto(label_c0);//  c0:	e7fe      	bn	c0 <Default_Handler> ;
+ goto label_c0;//  c0:	e7fe      	bn	c0 <Default_Handler> ;
 }
 void HardFault_Handler() 
 {label_c2:  ;
- goto(label_c2);//  c2:	e7fe      	bn	c2 <HardFault_Handler> ;
+ goto label_c2;//  c2:	e7fe      	bn	c2 <HardFault_Handler> ;
 }
 void _stop_init() 
 {label_c4:  ;
@@ -342,11 +342,11 @@ ADDS(r2, 4);// 1da:	3204      	adds	r2, #4 ;
 label_1dc:  ;
 STR(r5, r3, 0);// 1dc:	601d      	str	r5, r3, #0 ;
 label_1de:  ;
- goto(label_1c6);// 1de:	e7f2      	bn	1c6 <_reset_init+0xa6> ;
+ goto label_1c6;// 1de:	e7f2      	bn	1c6 <_reset_init+0xa6> ;
 label_1e0:  ;
 //Could not parse:  1e0:	c302      	stmia	r3!, r1 ;
 label_1e2:  ;
- goto(label_1d0);// 1e2:	e7f5      	bn	1d0 <_reset_init+0xb0> ;
+ goto label_1d0;// 1e2:	e7f5      	bn	1d0 <_reset_init+0xb0> ;
 label_1e4:  ;
 //Could not parse:  1e4:	40047000 	word	0x40047000 ;
 label_1e8:  ;
@@ -416,7 +416,7 @@ CMP(r3, 0);// 426:	2b00      	cmp	r3, #0 ;
 label_428:  ;
 //Could not parse:  428:	d1fa      	bnen	420 <delay+0x10> ;
 label_42a:  ;
- goto(label_416);// 42a:	e7f4      	bn	416 <delay+0x6> ;
+ goto label_416;// 42a:	e7f4      	bn	416 <delay+0x6> ;
 }
 void main() 
 {label_42c:  ;
@@ -444,7 +444,7 @@ CMP(r4, 8);// 446:	2c08      	cmp	r4, #8 ;
 label_448:  ;
 //Could not parse:  448:	d1f6      	bnen	438 <main+0xc> ;
 label_44a:  ;
- goto(label_436);// 44a:	e7f4      	bn	436 <main+0xa> ;
+ goto label_436;// 44a:	e7f4      	bn	436 <main+0xa> ;
 }
 void configure_rgbled() 
 {label_44c:  ;
@@ -740,7 +740,7 @@ label_57e:  ;
 label_580:  ;
 turn_on_blue_led();// 580:	f7ff ffd8 	bl	534 <turn_on_blue_led> ;
 label_584:  ;
- goto(label_572);// 584:	e7f5      	bn	572 <set_rgbled_color_to+0xa> ;
+ goto label_572;// 584:	e7f5      	bn	572 <set_rgbled_color_to+0xa> ;
 label_586:  ;
 CMP(r0, 2);// 586:	2802      	cmp	r0, #2 ;
 label_588:  ;
@@ -750,7 +750,7 @@ turn_off_blue_led();// 58a:	f7ff ffdb 	bl	544 <turn_off_blue_led> ;
 label_58e:  ;
 turn_on_green_led();// 58e:	f7ff ff95 	bl	4bc <turn_on_green_led> ;
 label_592:  ;
- goto(label_576);// 592:	e7f0      	bn	576 <set_rgbled_color_to+0xe> ;
+ goto label_576;// 592:	e7f0      	bn	576 <set_rgbled_color_to+0xe> ;
 label_594:  ;
 CMP(r0, 3);// 594:	2803      	cmp	r0, #3 ;
 label_596:  ;
@@ -758,7 +758,7 @@ label_596:  ;
 label_598:  ;
 turn_on_blue_led();// 598:	f7ff ffcc 	bl	534 <turn_on_blue_led> ;
 label_59c:  ;
- goto(label_58e);// 59c:	e7f7      	bn	58e <set_rgbled_color_to+0x26> ;
+ goto label_58e;// 59c:	e7f7      	bn	58e <set_rgbled_color_to+0x26> ;
 label_59e:  ;
 CMP(r0, 4);// 59e:	2804      	cmp	r0, #4 ;
 label_5a0:  ;
@@ -770,7 +770,7 @@ turn_off_green_led();// 5a6:	f7ff ff93 	bl	4d0 <turn_off_green_led> ;
 label_5aa:  ;
 turn_on_red_led();// 5aa:	f7ff ffa5 	bl	4f8 <turn_on_red_led> ;
 label_5ae:  ;
- goto(label_57a);// 5ae:	e7e4      	bn	57a <set_rgbled_color_to+0x12> ;
+ goto label_57a;// 5ae:	e7e4      	bn	57a <set_rgbled_color_to+0x12> ;
 label_5b0:  ;
 CMP(r0, 5);// 5b0:	2805      	cmp	r0, #5 ;
 label_5b2:  ;
@@ -778,7 +778,7 @@ label_5b2:  ;
 label_5b4:  ;
 turn_on_blue_led();// 5b4:	f7ff ffbe 	bl	534 <turn_on_blue_led> ;
 label_5b8:  ;
- goto(label_5a6);// 5b8:	e7f5      	bn	5a6 <set_rgbled_color_to+0x3e> ;
+ goto label_5a6;// 5b8:	e7f5      	bn	5a6 <set_rgbled_color_to+0x3e> ;
 label_5ba:  ;
 CMP(r0, 6);// 5ba:	2806      	cmp	r0, #6 ;
 label_5bc:  ;
@@ -788,9 +788,9 @@ turn_off_blue_led();// 5be:	f7ff ffc1 	bl	544 <turn_off_blue_led> ;
 label_5c2:  ;
 turn_on_green_led();// 5c2:	f7ff ff7b 	bl	4bc <turn_on_green_led> ;
 label_5c6:  ;
- goto(label_5aa);// 5c6:	e7f0      	bn	5aa <set_rgbled_color_to+0x42> ;
+ goto label_5aa;// 5c6:	e7f0      	bn	5aa <set_rgbled_color_to+0x42> ;
 label_5c8:  ;
 turn_on_blue_led();// 5c8:	f7ff ffb4 	bl	534 <turn_on_blue_led> ;
 label_5cc:  ;
- goto(label_5c2);// 5cc:	e7f9      	bn	5c2 <set_rgbled_color_to+0x5a> ;
+ goto label_5c2;// 5cc:	e7f9      	bn	5c2 <set_rgbled_color_to+0x5a> ;
 }

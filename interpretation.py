@@ -9,20 +9,23 @@ def BLInsert(line, BLIndex):
 	return "//ERROR PARSING BL "
 
 def BranchInsert(line, BIndex):
-	return(" goto(label_" + line.split()[BIndex + 1] + " ")
+	return(" goto label_" + line.split()[BIndex + 1] + " ")
 	return "\\ERROR PARSING BRANCH"
 
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
 json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data
+bjson_file = open("branchesJSON.json")   
+bjson_str = bjson_file.read()             #convert the file into a string
+bjson_data = json.loads(bjson_str)        #convert the string into a dict, by loading the json data
 assemblyList = []
-branchesList = ["b","bn","bne"]
 functionDec = ""
 for x in json_data:
   assemblyList.append(x.lower())
 assemblyList.extend(branchesList)
 assembly_file = open("timing_demo.txt", "r")
 interprettedFile = open("parsed.cpp","w")
+addParentheses = True
 
 for line in assembly_file:
 	line = line.replace("{","")
@@ -43,15 +46,20 @@ for line in assembly_file:
 	commandFound = 0
 	line = line.replace(";"," ;")
 	line = line.replace("\n"," ;")
-	for i in range(len(line.split())):	
+	for i in range(len(line.split())):
+		addParentheses = True
 		if(commandFound == 0):
-			if(line.split()[i] in assemblyList):
+			if(line.split()[i] in bjson_data.keys()):
 				if(line.split()[i] == "bl"):
 					toWrite += BLInsert(line, i);
 					break
-				elif(line.split()[i] in branchesList):
+				else:
+					toWrite += bjson_data[line.split()[i]]
 					toWrite += BranchInsert(line, i)
+					toWrite += "}"
+					addParentheses = False;
 					break;
+			if(line.split()[i] in assemblyList):				
 				commandFound = 1
 				toWrite += line.split()[i].upper() + "(";
 		elif(commandFound == 1):
@@ -71,7 +79,10 @@ for line in assembly_file:
 				else:
 					toWrite += "\"" + line.split()[i].replace(",","") + "\", "
 	if(toWrite != ""):
-		interprettedFile.write(toWrite[:-1] + ");")
+		if(addParentheses):
+			interprettedFile.write(toWrite[:-1] + ");")
+		else:
+			interprettedFile.write(toWrite[:-1] + ";")	
 		interprettedFile.write("//" + line + "\n")
 	else:
 		interprettedFile.write("//Could not parse: " + line + "\n")
@@ -82,7 +93,7 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		content = interprettedFile.read()
 		interprettedFile.seek(0)
 		interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n//#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
-		interprettedFile.write("uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;\n")
+		interprettedFile.write("int r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;\n")
 		interprettedFile.write("bool n_flag, z_flag, c_flag, v_flag =  false;\n")
 		interprettedFile.write("int result = 0;\n")
 		interprettedFile.write(functionDec)

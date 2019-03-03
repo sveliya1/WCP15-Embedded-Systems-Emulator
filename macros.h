@@ -1,85 +1,351 @@
 #pragma once
 
-#define ADC(a1, a2, carry) a1 = a1 + a2 + carry;
-#define ADD(a1, a2) a1 = a1 + a2;
-#define ADDS(a1, a2){\
-	result = a1 + a2;\
-	n_flag = (a1 & (1 << 31));\
-	z_flag = (a1 == 0);\
-	c_flag = (a1  & (1 << 32));\
-	v_flag = ((a1 & (1 << 31)) == ((a1 & (1 << 31)) ^ (a2 & (1 << 31))));\
-	a1 = a1 + a2;\
+#define ADC(Rd, Rn) {\
+Rd = Rd + Rn + C_flag;\
+g_cycle_count += 1;\
 }
-#define AND(a1, a2) a1 = a1 & a2;
-#define ANDS(a1, a2){\
-	result = a1 & a2;\
-	n_flag = (result & (1 << 31));\
-	z_flag = (result == 0);\
-	a1 = a1 & a2;\
+#define	ADC(Rd,Rn,Rm){\
+Rd = Rn + Rm + C_flag;\
+g_cycle_count += 1;\
 }
-#define BIC(a1, a2) a1 = a1 & ~a2;
-#define BICS(a1, a2){\
-	result = a1 & ~a2;\
+#define ADCS(Rd,Rn){\
+	result = Rd + Rn + C_flag;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
-	a1 = a1 & ~a2;\
+	C_flag = (result & (1ULL << 32ULL));\
+	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
+	Rd = result;\
+	g_cycle_count += 1;\
 }
-#define BX //TODO
-#define CDP //co-processor specific
-#define CMP(a1, a2){\
-	result = a1 - a2;\
-	n_flag = (result & (1 & 31));\
-	z_flag = (result == 0);\
-	c_flag = a1 >= result;\
-	v_flag = ((result & (1 << 31)) == ((a1 & (1 << 31)) ^ (a2 & (1 << 31))));\
+#define ADCS(Rd,Rn, Rm){\
+	result = Rn + Rm + C_flag;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1ULL << 32ULL));\
+	V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
+	Rd = result;\
+	g_cycle_count += 1;\
 }
-#define EOR(a1, a2) a1 = a1 ^ a2;
-#define EORS(a1, a2){\
-	result = a1 ^ a2;\
-	n_flag = (result & (1 << 31));\
-	z_flag = (result == 0); \
-	a1 = a1 ^ a2;\
+#define ADD(Rd, Rn) Rd = Rd + Rn; g_cycle_count += 1;
+#define ADD(Rd, Rn, Rm) Rd = Rn + Rm; g_cycle_count += 1;
+#define ADDS(Rd, Rn){\
+	result = Rd + Rn;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result  & (1 << 32));\
+	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
+	Rd = result;\
+	g_cycle_count += 1;\
 }
-#define LDC //coprocessor load
-#define LDM //stack manipulation (pop)
-#define LDR //load from memory
-#define MCR //TODO
-#define MLA //todo
-#define MOV(a1, a2) a1 = a2;
-#define MOVS(a1, a2) a1 = a2; result = a2;
-#define MRC //todo
-#define MRS //TODO
-#define MUL(a1, a2) a1 = a1 * a2;
-#define MVN(a1, a2) a1 = ~a2;
-#define ORR(a1, a2) a1 = a1 | a2;
-#define ORRS(a1, a2){\
-	result = a1 | a2;\
-	n_flag = (result & (1 << 31));\
-	z_flag = (result == 0); \
-	a1 = a1 | a2;\
+#define ADDS(Rd, Rn, Rm){\
+	result = Rn + Rm;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result  & (1 << 32));\
+	V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
+	Rd = result;\
+	g_cycle_count += 1;\
 }
-#define RSB(a1, a2) a1 = a2 - a1;
-#define RSC(a1, a2) a1 = a2 - a1 - carry;
-#define SBC(a1, a2) a1 = a1 - a2 - 1 + carry;
-#define STC //todo
+#define AND(Rd, Rn) Rd = Rd & Rn; g_cycle_count += 1;
+#define AND(Rd, Rn, Rm) Rd = Rn & Rm; g_cycle_count += 1;
+#define ANDS(Rd, Rn){\
+	result = Rd & Rn;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define ANDS(Rd, Rn, Rm){\
+	result = Rn & Rm;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	Rd = Rn & Rm;\
+	g_cycle_count += 1;\
+}
+#define ASRS(Rd,Rn){\
+if ((int32_t)Rd < 0 && (int32_t)Rn > 0)\
+	result = (int32_t)Rd >> (int32_t)Rn | ~(~0U >> (int32_t)Rn);\
+else\
+	result = (int32_t)Rd >> (int32_t)Rn;\
+if (Rn)\
+	C_flag = (result & (1 << Rn));\
+N_flag = (result & (1 << 31));\
+Z_flag = (result == 0);\
+Rd = result;\
+g_cycle_count += 1;\
+}
+#define ASRS(Rd,Rn,Rm){\
+if ((int32_t)Rn < 0 && (int32_t)Rm > 0)\
+	result = (int32_t)Rn >> (int32_t)Rm | ~(~0U >> (int32_t)Rm); \
+else\
+	result = (int32_t)Rn >> (int32_t)Rm; \
+if (Rm)\
+	C_flag = (result & (1 << Rm)); \
+N_flag = (result & (1 << 31)); \
+Z_flag = (result == 0); \
+Rd = result;\
+g_cycle_count += 1;\
+}
+#define BIC(Rd, Rn) Rd = Rd & ~Rn; g_cycle_count += 1;
+#define BIC(Rd, Rn, Rm) Rd = Rn & ~Rm; g_cycle_count += 1;
+#define BICS(Rd, Rn){\
+	result = Rd & ~Rn;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+
+#define BICS(Rd, Rn, Rm){\
+	result = Rn & ~Rm;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define BX_LR g_cycle_count += 3; return;
+#define CMP(Rd, Rn){\
+	result = Rd - Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = !(operand2 > operand1);\
+	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
+	g_cycle_count += 1;\
+}
+#define CMN(Rd,Rn){\
+	result = Rd - ~Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = !(operand2 > operand1);\
+	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
+	g_cycle_count += 1;\
+}
+#define EOR(Rd, Rn) Rd = Rd ^ Rn; g_cycle_count += 1;
+#define EOR(Rd,Rn,Rm) Rd = Rn ^ Rm; g_cycle_count += 1;
+#define EORS(Rd, Rn){\
+	result = Rd ^ Rn;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0); \
+	Rd = result; \
+	g_cycle_count += 1;\
+}
+#define EORS(Rd, Rn, Rm){\
+	result = Rn ^ Rm;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0); \
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LDR(reg,address){\
+reg = map -> read(address, WORD);\
+supervisor();\
+get_io_mutex();\
+g_cycle_count += 2;\
+}
+#define LDRB(reg,address){\
+reg = map -> read(address, BYTE);\
+supervisor();\
+get_io_mutex();\
+g_cycle_count += 2;\
+}
+#define LDRH(reg,address){\
+reg = map -> read(address, HALF_WORD);\
+supervisor();\
+get_io_mutex();\
+g_cycle_count += 2;\
+}
+#define MOV(Rd, Rn) Rd = Rn; g_cycle_count += 1;
+#define MOVS(Rd, Rn){\
+	Rd = Rn;\
+	N_flag = (Rd & (1 << 31));\
+	Z_flag = (Rd == 0);\
+	g_cycle_count += 1;\
+}
+#define MVNS(Rd, Rn){\
+	Rd = ~Rn;\
+	N_flag = (Rd & (1 << 31));\
+	Z_flag = (Rd == 0);\
+	g_cycle_count += 1;\
+}
+#define MULS(Rd, Rn){\
+result = Rd * Rn;\
+N_flag = (result & (1 << 31));\
+Z_flag = (result == 0);\
+Rd = result;\
+g_cycle_count += 1;\
+}
+#define MULS(Rd,Rn,Rm){\
+result = Rn * Rm;\
+N_flag = (result & (1 << 31));\
+Z_flag = (result == 0);\
+Rd = result;\
+g_cycle_count += 1;\
+}
+#define MVN(Rd, Rn) Rd = ~Rn; g_cycle_count += 1;
+#define ORR(Rd, Rn) Rd = Rd | Rn; g_cycle_count += 1;
+#define ORR(Rd,Rn,Rm) Rd = Rn | Rm; g_cycle_count += 1;
+#define ORRS(Rd, Rn){\
+	result = Rd | Rn;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0); \
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define ORRS(Rd,Rn,Rm){\
+	result = Rn | Rm;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0); \
+	Rd = result;\
+	g_cycle_count += 1;\
+};
+#define ORNS(Rd,Rn){\
+	result = Rd | ~Rn;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define ORNS(Rd,Rn,Rm){\
+	result = Rn | ~Rm;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define RORS(Rd,Rn){\
+	result = ((uint32_t)Rd >> (uint32_t)Rn) | ((uint32_t)Rd) << (32 - (uint32_t)Rn);\
+	if (Rn)\
+		C_flag = (result & (1 << Rn));\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0); \
+	Rd = result;\
+	g_cycle_count += 1;\
+};
+#define RORS(Rd,Rn,Rm){\
+	result = ((uint32_t)Rn >> (uint32_t)Rm) | ((uint32_t)Rn) << (32 - (uint32_t)Rm);\
+	if (Rm)\
+		C_flag = (result & (1 << Rm));\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0); \
+	Rd = result;\
+	g_cycle_count += 1;\
+};
+#define RSB(Rd, Rn) Rd = Rn - Rd; g_cycle_count += 1;
+#define RSB(Rd, Rn, Rm) Rd = Rm - Rn; g_cycle_count += 1;
+#define RSBS(Rd,Rn) {\
+result = Rn - Rd;\
+N_flag = (result & (1 << 31));\
+Z_flag = (result == 0);\
+C_flag = !(operand2 > operand1);\
+V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
+Rd = result;\
+g_cycle_count += 1;\
+}
+#define RSBS(Rd,Rn,Rm){\
+result = Rm - Rn;\
+N_flag = (result & (1 << 31));\
+Z_flag = (result == 0);\
+C_flag = !(operand2 > operand1);\
+V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
+Rd = result;\
+g_cycle_count += 1;\
+}
+//#define RSC(Rd, Rn) Rd = Rn - Rd - carry; Not defined in Thumb mode
+//#define RSC(Rd, Rn, Rm) Rd = Rm - Rn - carry;
+#define SBC(Rd, Rn) Rd = Rd - Rn - 1 + carry; g_cycle_count += 1;
+#define SBC(Rd, Rn,Rm) Rd = Rn - Rm - 1 + carry; g_cycle_count += 1;
+#define SBCS(Rd,Rn){\
+result = Rd - Rn - C_flag;\
+N_flag = (result & (1 << 31));\
+Z_flag = (result == 0);\
+C_flag = !(operand2 > operand1);\
+V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
+Rd = result;\
+g_cycle_count += 1;\
+}
+#define SBCS(Rd,Rn, Rm){\
+result = Rn - Rm - C_flag;\
+N_flag = (result & (1 << 31));\
+Z_flag = (result == 0);\
+C_flag = !(operand2 > operand1);\
+V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
+Rd = result;\
+g_cycle_count += 1;\
+}
 #define PUSH //todo
-#define STR(a1, a2) //TODO
-#define SUB(a1, a2) a1 = a1 - a2;
-#define SUBS(a1, a2){\
-	result = a1 - a2;\
-	n_flag = (result & (1 & 31));\
-	z_flag = (result == 0);\
-	c_flag = a1 >= result;\
-	v_flag = ((result & (1 << 31)) == ((a1 & (1 << 31)) ^ (a2 & (1 << 31))));\
-	a1 = a1 - a2;\
+#define STR(value, address){\
+ map -> write(value, (unsigned) address, WORD);\
+supervisor();\
+get_io_mutex();\
+g_cycle_count += 2;\
 }
-#define SWI(a1, a2) //TODO os call
-#define SWP //todo
-#define TEQ(a1, a2) //TODO
-#define TST //TODO
-#define LSRS(a1, a2, a3) a1 = (a2 >> a3);
-#define LSLS(a1, a2, a3) a1 = (a2 << a3);
-#define BNE //TODO
-#define BEQ //TODO
-#define B //TODO
-#define BL //TODO
+#define STRB(value, address){\
+ map -> write(value, (unsigned) address, BYTE);\
+supervisor();\
+get_io_mutex();\
+g_cycle_count += 2;\
+}
+#define STRH(value, address){\
+ map -> write(value, (unsigned) address, HALF_WORD);\
+supervisor();\
+get_io_mutex();\
+g_cycle_count += 2;\
+}
+#define SUB(Rd,Rn) Rd = Rd - Rn; g_cycle_count += 1;
+#define SUB(Rd,Rn,Rm) Rd = Rn - Rm; g_cycle_count += 1;
+#define SUBS(Rd, Rn){\
+	result = Rd - Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = !(operand2 > operand1);\
+	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define SUBS(Rd, Rn, Rm){\
+	result = Rn - Rm;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = !(operand2 > operand1);\
+	V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define TST(Rd,Rn){\
+	result = operand1 & operand2;\
+	N_flag = (result & (1 << 31));\
+	Z_flag = (result == 0);\
+	g_cycle_count += 1;\
+}
+#define LSRS(Rd,Rn){\
+	result = Rd >> Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSRS(Rd, Rn, Rm){\
+	result = Rn >> Rm;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSLS(Rd,Rn){\
+	result = Rd << Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSLS(Rd, Rn, Rm){\
+	result = Rn << Rm;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
