@@ -154,6 +154,38 @@ supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
+#define LSRS(Rd,Rn){\
+	result = Rd >> Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSRS(Rd, Rn, Rm){\
+	result = Rn >> Rm;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSLS(Rd,Rn){\
+	result = Rd << Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSLS(Rd, Rn, Rm){\
+	result = Rn << Rm;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
 #define MOV(Rd, Rn) Rd = Rn; g_cycle_count += 1;
 #define MOVS(Rd, Rn){\
 	Rd = Rn;\
@@ -212,6 +244,7 @@ g_cycle_count += 1;\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
+#define PUSH //TODO
 #define RORS(Rd,Rn){\
 	result = ((uint32_t)Rd >> (uint32_t)Rn) | ((uint32_t)Rd) << (32 - (uint32_t)Rn);\
 	if (Rn)\
@@ -272,7 +305,22 @@ V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define PUSH //todo
+#define SXTB(Rd,Rm){\
+	lsb_byte = (0xFF & Rm);\
+	if (lsb_byte & (1 << 7))\
+		Rd = (0xFFFFFF00 | lsb_byte;\
+	else\
+		Rd = lsb_byte;\
+	g_cycle_count += 1;\
+}
+#define SXTH(Rd,Rm){\
+	lsb_word = (0xFFFF & Rm);\
+	if (lsb_word & (1 << 15))\
+		Rd = (0xFFFF0000 | lsb_word;\
+	else\
+		Rd = lsb_word;\
+	g_cycle_count += 1;\
+}
 #define STR(value, address){\
  map -> write(value, (unsigned) address, WORD);\
 supervisor();\
@@ -317,35 +365,11 @@ g_cycle_count += 2;\
 	Z_flag = (result == 0);\
 	g_cycle_count += 1;\
 }
-#define LSRS(Rd,Rn){\
-	result = Rd >> Rn;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
+#define UXTB(Rd,Rm){\
+	Rd = (0xFF & Rm);\
 	g_cycle_count += 1;\
 }
-#define LSRS(Rd, Rn, Rm){\
-	result = Rn >> Rm;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
-	g_cycle_count += 1;\
-}
-#define LSLS(Rd,Rn){\
-	result = Rd << Rn;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
-	g_cycle_count += 1;\
-}
-#define LSLS(Rd, Rn, Rm){\
-	result = Rn << Rm;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
+#define UXTH(Rd,Rm){\
+	Rd = (0xFFFF & Rm);\
 	g_cycle_count += 1;\
 }
