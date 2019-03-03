@@ -12,18 +12,26 @@ def BranchInsert(line, BIndex):
 	return(" goto label_" + line.split()[BIndex + 1] + " ")
 	return "\\ERROR PARSING BRANCH"
 
+def findLine(lineNumber):
+	global assemblyContents
+	for line in assemblyContents:
+		if(line.split()[i] == lineNumber):
+			return line
+
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
 json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data
-bjson_file = open("branchesJSON.json")   
+bjson_file = open("branchJSON.json")   
 bjson_str = bjson_file.read()             #convert the file into a string
 bjson_data = json.loads(bjson_str)        #convert the string into a dict, by loading the json data
 assemblyList = []
 functionDec = ""
 for x in json_data:
   assemblyList.append(x.lower())
-assemblyList.extend(branchesList)
+#assemblyList.extend(branchesList)
 assembly_file = open("timing_demo.txt", "r")
+assemblyContents = assembly_file.readlines()
+assembly_file.seek(0)
 interprettedFile = open("parsed.cpp","w")
 addParentheses = True
 
@@ -49,14 +57,15 @@ for line in assembly_file:
 	for i in range(len(line.split())):
 		addParentheses = True
 		if(commandFound == 0):
-			if(line.split()[i] in bjson_data.keys()):
+			if(line.split()[i].upper() in bjson_data.keys()):
 				if(line.split()[i] == "bl"):
+					
 					toWrite += BLInsert(line, i);
 					break
 				else:
-					toWrite += bjson_data[line.split()[i]]
+					toWrite += bjson_data[line.split()[i].upper()]
 					toWrite += BranchInsert(line, i)
-					toWrite += "}"
+					toWrite += "} "
 					addParentheses = False;
 					break;
 			if(line.split()[i] in assemblyList):				
