@@ -32,6 +32,6 @@
   
   "BGT": "branch if (Z flag clear and ((N flag set or V flag set) or (N flag clear or V flag clear)))",
   "BGT.N": "thumb 'narrow' version",
-  "BLE": "branch if (Z flag set or ((N flag set and V flag clear) or (N flag clear and V flag set)))"
+  "BLE": "branch if (Z flag set or ((N flag set and V flag clear) or (N flag clear and V flag set)))",
   "BLE.N": "thumb 'narrow' version"
   }
