@@ -6,6 +6,7 @@
   "ANDS": "logical and",
   "ASR": "arithmetic shift right",
   "BIC": "bit clear",
+  "BICS": "arm thumb version",
   "BX": "branch exchange",
   "CDP": "",
   "CMN": "compare negative",
