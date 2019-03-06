@@ -40,6 +40,7 @@ interprettedFile = open("parsed.cpp","w")
 addParentheses = True
 
 for line in assembly_file:
+	argCount = 0
 	line = line.replace("{","")
 	line = line.replace(".","");
 	line = line.replace("}","")
@@ -71,9 +72,15 @@ for line in assembly_file:
 					toWrite += "} "
 					addParentheses = False;
 					break;
+			elif(line.split()[i] == "stmia"):
+				toWrite += "stmia_*insertNumber*(" + line.split()[i+1]
+				i = i+2
+				while(not("]" in line.split()[i])):
+
+				
 			if(line.split()[i] in assemblyList):				
 				commandFound = 1
-				toWrite += line.split()[i].upper() + "(";
+				toWrite += line.split()[i].upper() + "_*insertNumber*(";
 		elif(commandFound == 1):
 			if(";" in line.split()[i]):
 				commandFound = 2
@@ -81,19 +88,26 @@ for line in assembly_file:
 			else:
 				if("(" in line.split()[i]):
 					toWrite += "\"" + line.split()[i] + " " + line.split()[i+1]+ "\""
+					argCount += 1
 					break;
 				elif("[" in line.split()[i] and "ldr" in line.split() and "pc" in line):
 					toWrite += findLine(line.split()[-3]).split()[-1]
+					argCount += 1
 					break;
 				elif("<" in line.split()[i]):
 					toWrite += "\"" + line.split()[i] + "\" ";
+					argCount += 1
 				elif("#" in line.split()[i]):
 					toWrite += line.split()[i].replace("#","").replace("[","").replace("]","") +","
+					argCount += 1
 				elif("r" or "pc" in line.split()[i]):
 					toWrite += line.split()[i].replace("[","").replace("]","") + " "
+					argCount += 1
 				else:
 					toWrite += "\"" + line.split()[i].replace(",","") + "\", "
+					argCount += 1
 	if(toWrite != ""):
+		toWrite = toWrite.replace("*insertNumber*", str(argCount))
 		if(addParentheses):
 			interprettedFile.write(toWrite[:-1] + ");")
 		else:
