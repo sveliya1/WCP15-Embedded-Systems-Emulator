@@ -78,7 +78,7 @@ for line in assembly_file:
 				i = i+2
 				regVector = 0b00000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
-					regVector = regVector + 0b10000000 >> int(line.split()[i].replace('r',''))-1
+					regVector = regVector + (0b10000000 >> int(line.split()[i].replace('r','').replace(",","")))-1
 					i += 1
 				toWrite += "0b" + "{0:0>9b}".format(regVector)
 			elif(line.split()[i] == "ldmia"):
@@ -86,9 +86,33 @@ for line in assembly_file:
 				i = i+2
 				regVector = 0b00000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
-					regVector = regVector + 0b10000000 >> int(line.split()[i].replace('r',''))-1
+					regVector = regVector + (0b10000000 >> int(line.split()[i].replace('r','').replace(",","")))-1
 					i += 1
 				toWrite += "0b" + "{0:0>9b}".format(regVector)
+			elif(line.split()[i] == "push"):
+				toWrite += "push("
+				i += 1
+				regVector = 0b000000000
+				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
+					if("lr" in line.split()[i]):
+						regVector = regVector + (0b100000000 >> 8)
+						i += 1
+					else:
+						regVector = regVector + (0b100000000 >> int(line.split()[i].replace('r','').replace(",",""))-1)
+						i += 1
+				toWrite += "0b" + "{0:0>10b}".format(regVector)
+			elif(line.split()[i] == "pop"):
+				toWrite += "pop("
+				i += 1
+				regVector = 0b000000000
+				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
+					if("pc" in line.split()[i]):
+						regVector = regVector + (0b100000000 >> 8)
+						i += 1
+					else:
+						regVector = regVector + (0b100000000 >> int(line.split()[i].replace('r','').replace(",",""))-1)
+						i += 1
+				toWrite += "0b" + "{0:0>10b}".format(regVector)
 
 				
 			if(line.split()[i] in assemblyList):				

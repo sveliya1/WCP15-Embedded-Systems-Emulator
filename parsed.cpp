@@ -89,7 +89,7 @@ LSLS_3(r1, r1, 6);//  ca:	0189      	lsls	r1, r1, #6 ;
 label_cc:  ;
 LDR_3(r0, r2, r3);//  cc:	58d0      	ldr	r0, [r2, r3] ;
 label_ce:  ;
-PUSH_3(r4, r5, lr);//  ce:	b530      	push	r4, r5, lr ;
+push(0b000011000);//  ce:	b530      	push	r4, r5, lr ;
 label_d0:  ;
 ORRS_2(r1, r0);//  d0:	4301      	orrs	r1, r0 ;
 label_d2:  ;
@@ -147,7 +147,7 @@ ANDS_2(r1, r0);// 102:	4001      	ands	r1, r0 ;
 label_104:  ;
 STR_3(r1, r2, r3);// 104:	50d1      	str	r1, [r2, r3] ;
 label_106:  ;
-POP_3(r4, r5, pc);// 106:	bd30      	pop	r4, r5, pc ;
+pop(0b000011000);// 106:	bd30      	pop	r4, r5, pc ;
 label_108:  ;
 //Could not parse:  108:	40047000 	word	0x40047000 ;
 label_10c:  ;
@@ -367,7 +367,7 @@ g_cycle_count++;
  {g_cycle_count+=2; //thumb 'narrow' version
  goto label_1c6 ; };// 1de:	e7f2      	bn	1c6 <_reset_init+0xa6> ;
 label_1e0:  ;
-stmia(r3,0b01000000);// 1e0:	c302      	stmia	r3!, r1 ;
+stmia(r3,0b00011111);// 1e0:	c302      	stmia	r3!, r1 ;
 label_1e2:  ;
 g_cycle_count++;
  {g_cycle_count+=2; //thumb 'narrow' version
@@ -451,7 +451,7 @@ g_cycle_count++;
 }
 void main() 
 {label_42c:  ;
-PUSH_4(r4, r5, r6, lr);// 42c:	b570      	push	r4, r5, r6, lr ;
+push(0b000011100);// 42c:	b570      	push	r4, r5, r6, lr ;
 label_42e:  ;
 MOVS_2(r5, 250);// 42e:	25fa      	movs	r5, #250	 ; 0xfa ;
 label_430:  ;
@@ -758,7 +758,7 @@ label_564:  ;
 }
 void set_rgbled_color_to() 
 {label_568:  ;
-PUSH_2(r4, lr);// 568:	b510      	push	r4, lr ;
+push(0b000010000);// 568:	b510      	push	r4, lr ;
 label_56a:  ;
 CMP_2(r0, 0);// 56a:	2800      	cmp	r0, #0 ;
 label_56c:  ;
@@ -775,7 +775,7 @@ label_576:  ;
 g_cycle_count += 3;
 turn_off_red_led();// 576:	f7ff ffc9 	bl	50c <turn_off_red_led> ;
 label_57a:  ;
-POP_2(r4, pc);// 57a:	bd10      	pop	r4, pc ;
+pop(0b000010000);// 57a:	bd10      	pop	r4, pc ;
 label_57c:  ;
 CMP_2(r0, 1);// 57c:	2801      	cmp	r0, #1 ;
 label_57e:  ;
