@@ -73,14 +73,26 @@ for line in assembly_file:
 					addParentheses = False;
 					break;
 			elif(line.split()[i] == "stmia"):
-				toWrite += "stmia_*insertNumber*(" + line.split()[i+1]
+				toWrite += "stmia(" + line.split()[i+1].replace("!","")
 				i = i+2
-				while(not("]" in line.split()[i])):
+				regVector = 0b00000000
+				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
+					regVector = regVector + 0b10000000 >> int(line.split()[i].replace('r',''))-1
+					i += 1
+				toWrite += "0b" + "{0:0>9b}".format(regVector)
+			elif(line.split()[i] == "ldmia"):
+				toWrite += "ldmia(" + line.split()[i+1].replace("!","")
+				i = i+2
+				regVector = 0b00000000
+				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
+					regVector = regVector + 0b10000000 >> int(line.split()[i].replace('r',''))-1
+					i += 1
+				toWrite += "0b" + "{0:0>9b}".format(regVector)
 
 				
 			if(line.split()[i] in assemblyList):				
 				commandFound = 1
-				toWrite += line.split()[i].upper() + "_*insertNumber*(";
+				toWrite += line.split()[i].upper() + "*insertNumber*("
 		elif(commandFound == 1):
 			if(";" in line.split()[i]):
 				commandFound = 2
