@@ -63,8 +63,9 @@ for line in assembly_file:
 		addParentheses = True
 		if(commandFound == 0):
 			if(line.split()[i].upper() in bjson_data.keys()):
-				if(line.split()[i] == "bl"):					
-					toWrite += BLInsert(line, i);
+				if(line.split()[i] == "bl"):	#fix this
+					toWrite += bjson_data[line.split()[i].upper()]
+					toWrite += BLInsert(line, i)					
 					break
 				else:
 					toWrite += bjson_data[line.split()[i].upper()]
@@ -92,7 +93,7 @@ for line in assembly_file:
 				
 			if(line.split()[i] in assemblyList):				
 				commandFound = 1
-				toWrite += line.split()[i].upper() + "*insertNumber*("
+				toWrite += line.split()[i].upper() + "_*insertNumber*("
 		elif(commandFound == 1):
 			if(";" in line.split()[i]):
 				commandFound = 2
