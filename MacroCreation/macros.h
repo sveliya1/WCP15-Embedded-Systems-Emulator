@@ -138,35 +138,35 @@ g_cycle_count += 1;\
 	g_cycle_count += 1;\
 }
 #define LDMIA(base_reg, reg_vector){\
-if (reg_vector & 1 << 7) {\
+if (reg_vector & (1 << 7)) {\
 		LDR_2(R0, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 6) {\
+if (reg_vector & (1 << 6)) {\
 		LDR_2(R1, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 5) {\
+if (reg_vector & (1 << 5)) {\
 		LDR_2(R2, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 4) {\
+if (reg_vector & (1 << 4)) {\
 		LDR_2(R3, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 3) {\
+if (reg_vector & (1 << 3)) {\
 		LDR_2(R4, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 2) {\
+if (reg_vector & (1 << 2)) {\
 		LDR_2(R5, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 1) {\
+if (reg_vector & (1 << 1)) {\
 		LDR_2(R6, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 0) {\
+if (reg_vector & (1 << 0)) {\
 		LDR_2(R7, base_reg);\
 		base_reg += 4;\
 }\
@@ -293,7 +293,82 @@ g_cycle_count += 1;\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define PUSH //TODO
+#define PUSH(SP, reg_vector) {\
+if (reg_vector & (1 << 8)) {\
+		STR_2(R0, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 7)) {\
+		STR_2(R1, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 6)) {\
+		STR_2(R2, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 5)) {\
+		STR_2(R3, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 4)) {\
+		STR_2(R4, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 3)) {\
+		STR_2(R5, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 2)) {\
+		STR_2(R6, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 1)) {\
+		STR_2(R7, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 0)) {\
+		STR_2(LR, SP); \
+		SP -= 4; \
+}\
+}
+#define POP(SP, reg_vector){\
+if (reg_vector & (1 << 8)) {\
+		LDR_2(R0, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 7)) {\
+		LDR_2(R1, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 6)) {\
+		LDR_2(R2, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 5)) {\
+		LDR_2(R3, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 4)) {\
+		LDR_2(R4, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 3)) {\
+		LDR_2(R5, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 2)) {\
+		LDR_2(R6, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 1)) {\
+		LDR_2(R7, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 0)) {\
+		LDR_2(PC, SP); \
+		SP += 4; \
+}\
+}
 #define RORS_2(Rd,Rn){\
 	result = ((uint32_t)Rd >> (uint32_t)Rn) | ((uint32_t)Rd) << (32 - (uint32_t)Rn);\
 	if (Rn)\
@@ -403,35 +478,35 @@ get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STMIA(base_reg, reg_vector) {\
-if (reg_vector & 1 << 7) {\
+if (reg_vector & (1 << 7)) {\
 		STR_2(R0, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 6) {\
+if (reg_vector & (1 << 6)) {\
 		STR_2(R1, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 5) {\
+if (reg_vector & (1 << 5)) {\
 		STR_2(R2, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 4) {\
+if (reg_vector & (1 << 4)) {\
 		STR_2(R3, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 3) {\
+if (reg_vector & (1 << 3)) {\
 		STR_2(R4, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 2) {\
+if (reg_vector & (1 << 2)) {\
 		STR_2(R5, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 1) {\
+if (reg_vector & (1 << 1)) {\
 		STR_2(R6, base_reg);\
 		base_reg += 4;\
 }\
-if (reg_vector & 1 << 0) {\
+if (reg_vector & (1 << 0)) {\
 		STR_2(R7, base_reg);\
 		base_reg += 4;\
 }\
