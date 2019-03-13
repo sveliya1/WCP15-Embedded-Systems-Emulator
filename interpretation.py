@@ -22,6 +22,11 @@ def findLine(lineNumber):
 			print("empty line?")
 	return ""
 
+with open("parsed.cpp", 'r+') as interprettedFile:
+		content = interprettedFile.read()
+		content.replace("main","main_interpretted")
+		interprettedFile.write(content)
+
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
 json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data
@@ -62,7 +67,11 @@ for line in assembly_file:
 	for i in range(len(line.split())):
 		addParentheses = True
 		if(commandFound == 0):
-			if(line.split()[i].upper() in bjson_data.keys()):
+			if("bx	lr" in line):
+				toWrite = "return "
+				addParentheses = False;
+				break;
+			elif(line.split()[i].upper() in bjson_data.keys()):
 				if(line.split()[i] == "bl"):	#fix this
 					toWrite += bjson_data[line.split()[i].upper()]
 					toWrite += BLInsert(line, i)					
@@ -105,16 +114,20 @@ for line in assembly_file:
 				toWrite += "pop("
 				i += 1
 				regVector = 0b000000000
+				pcFound = False
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
 					if("pc" in line.split()[i]):
 						regVector = regVector + (0b100000000 >> 8)
 						i += 1
+						pcFound = True
 					else:
 						regVector = regVector + (0b100000000 >> int(line.split()[i].replace('r','').replace(",",""))-1)
 						i += 1
 				toWrite += "0b" + "{0:0>10b}".format(regVector)
-
-				
+				if(pcFound):
+					toWrite += ");\nreturn "
+					addParentheses = False	
+					break
 			if(line.split()[i] in assemblyList):				
 				commandFound = 1
 				toWrite += line.split()[i].upper() + "_*insertNumber*("
@@ -128,7 +141,9 @@ for line in assembly_file:
 					argCount += 1
 					break;
 				elif("[" in line.split()[i] and "ldr" in line.split() and "pc" in line):
-					toWrite += findLine(line.split()[-3]).split()[-1]
+					toSet = findLine(line.split()[-3]).split()[-1]
+					toWrite = ""
+
 					argCount += 1
 					break;
 				elif("<" in line.split()[i]):
@@ -159,12 +174,10 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		content = interprettedFile.read()
 		interprettedFile.seek(0)
 		interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n//#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
-		interprettedFile.write("int r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, pc, lr, sp;\n")
+		interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, lr, pc, result;\n")
 		interprettedFile.write("bool N_flag, Z_flag, C_flag, V_flag =  false;\n")
-		interprettedFile.write("int result = 0;\n")
-		interprettedFile.write("int g_cycle_count = 0;\n")
+		interprettedFile.write("uint64_t g_cycle_count = 0;\n")
 		interprettedFile.write(functionDec)
-		interprettedFile.write("int Memory[2048];\n")
 		interprettedFile.write("void filler()\n{\n")
 		interprettedFile.write(content)
 json_file.close()
