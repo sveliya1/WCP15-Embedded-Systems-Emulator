@@ -33,7 +33,7 @@ g_cycle_count += 1;\
 	result = Rd + Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
-	C_flag = (result  & (1 << 32));\
+	C_flag = (result  & (1ULL << 32ULL));\
 	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 	Rd = result;\
 	g_cycle_count += 1;\
@@ -42,7 +42,7 @@ g_cycle_count += 1;\
 	result = Rn + Rm;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
-	C_flag = (result  & (1 << 32));\
+	C_flag = (result  & (1ULL << 32ULL));\
 	V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 	Rd = result;\
 	g_cycle_count += 1;\
@@ -188,11 +188,11 @@ get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LDR_3(reg,rg_addr, offset){\
-reg = map -> read((rg_addr+offset), Size::WORD);\
+reg = map -> read((unsigned)(rg_addr+offset), Size::WORD);\
 g_cycle_count += 2;\
 }
 #define LDRB_3(reg,address){\
-reg = map -> read((rg_addr+offset), Size::BYTE);\
+reg = map -> read((unsigned)(rg_addr+offset), Size::BYTE);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
@@ -446,33 +446,33 @@ g_cycle_count += 1;\
 	g_cycle_count += 1;\
 }
 #define STR_2(value, address){\
- map -> write(value, (unsigned) address, Size::WORD);\
+ map -> write(address, (uint32_t) value, Size::WORD);\
 g_cycle_count += 2;\
 }
 #define STRB_2(value, address){\
- map -> write(value, (unsigned) address, Size::BYTE);\
+ map -> write(address, (unsigned) value, Size::BYTE);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRH_2(value, address){\
- map -> write(value, (unsigned) address, Size::HALF_WORD);\
+ map -> write(address, (unsigned) value, Size::HALF_WORD);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STR_3(value, reg, offset){\
- map -> write(value, (unsigned) (reg + offset), Size::WORD);\
+ map -> write((unsigned)(reg+offset), value, Size::WORD);\
 g_cycle_count += 2;\
 }
 #define STRB_3(value, reg, offset){\
- map -> write(value, (unsigned) (reg + offset), Size::BYTE);\
+ map -> write((unsigned)(reg+offset), value, Size::BYTE);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRH_3(value, reg, offset){\
- map -> write(value, (unsigned) (reg + offset), Size::HALF_WORD);\
+ map -> write((unsigned)(reg+offset), value, Size::HALF_WORD);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
