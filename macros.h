@@ -1,41 +1,15 @@
 #pragma once
-
-
-#define __NARG__(...)  __NARG_I_(__VA_ARGS__,__RSEQ_N())
-#define __NARG_I_(...) __ARG_N(__VA_ARGS__)
-#define __ARG_N( \
-      _1, _2, _3, _4, _5, _6, _7, _8, _9,_10, \
-     _11,_12,_13,_14,_15,_16,_17,_18,_19,_20, \
-     _21,_22,_23,_24,_25,_26,_27,_28,_29,_30, \
-     _31,_32,_33,_34,_35,_36,_37,_38,_39,_40, \
-     _41,_42,_43,_44,_45,_46,_47,_48,_49,_50, \
-     _51,_52,_53,_54,_55,_56,_57,_58,_59,_60, \
-     _61,_62,_63,N,...) N
-#define __RSEQ_N() \
-     63,62,61,60,                   \
-     59,58,57,56,55,54,53,52,51,50, \
-     49,48,47,46,45,44,43,42,41,40, \
-     39,38,37,36,35,34,33,32,31,30, \
-     29,28,27,26,25,24,23,22,21,20, \
-     19,18,17,16,15,14,13,12,11,10, \
-     9,8,7,6,5,4,3,2,1,0
-
-// general definition for any function name
-#define _VFUNC_(name, n) name##n
-#define _VFUNC(name, n) _VFUNC_(name, n)
-#define VFUNC(func, ...) _VFUNC(func, __NARG__(__VA_ARGS__)) (__VA_ARGS__)
-
-#define ADC(...)VFUNC(ADC,__VA_ARGS__)
-#define ADC2(Rd, Rn) {\
+#include "memorymap.h"
+//Libary Macro Code
+#define ADC_2(Rd, Rn) {\
 Rd = Rd + Rn + C_flag;\
 g_cycle_count += 1;\
 }
-#define	ADC3(Rd,Rn,Rm){\
+#define	ADC_3(Rd,Rn,Rm){\
 Rd = Rn + Rm + C_flag;\
 g_cycle_count += 1;\
 }
-#define ADCS(...)VFUNC(ADCS,__VA_ARGS__)
-#define ADCS2(Rd,Rn){\
+#define ADCS_2(Rd,Rn){\
 	result = Rd + Rn + C_flag;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
@@ -44,8 +18,8 @@ g_cycle_count += 1;\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define ADCS3(Rd,Rn, Rm){\
-	result = Rn + Rm + C_flag;\
+#define ADCS_3(Rd,Rn, Rm){\
+	uint64_t result = Rn + Rm + C_flag;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
 	C_flag = (result & (1ULL << 32ULL));\
@@ -53,46 +27,43 @@ g_cycle_count += 1;\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define ADD(...)VFUNC(ADD,__VA_ARGS__)
-#define ADD2(Rd, Rn) Rd = Rd + Rn; g_cycle_count += 1;
-#define ADD3(Rd, Rn, Rm) Rd = Rn + Rm; g_cycle_count += 1;
-#define ADDS(...)VFUNC(ADDS,__VA_ARGS__)
-#define ADDS2(Rd, Rn){\
+#define ADD_2(Rd, Rn) Rd = Rd + Rn; g_cycle_count += 1;
+#define ADD_3(Rd, Rn, Rm) Rd = Rn + Rm; g_cycle_count += 1;
+#define ADDS_2(Rd, Rn){\
 	result = Rd + Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
-	C_flag = (result  & (1 << 32));\
+	C_flag = (result  & (1ULL << 32ULL));\
 	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define ADDS3(Rd, Rn, Rm){\
+#define ADDS_3(Rd, Rn, Rm){\
 	result = Rn + Rm;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
-	C_flag = (result  & (1 << 32));\
+	C_flag = (result  & (1ULL << 32ULL));\
 	V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define AND(...)VFUNC(AND,__VA_ARGS__)
-#define AND2(Rd, Rn) Rd = Rd & Rn; g_cycle_count += 1;
-#define AND3(Rd, Rn, Rm) Rd = Rn & Rm; g_cycle_count += 1;
-#define ANDS(Rd, Rn){\
+#define AND_2(Rd, Rn) Rd = Rd & Rn; g_cycle_count += 1;
+#define AND_3(Rd, Rn, Rm) Rd = Rn & Rm; g_cycle_count += 1;
+#define ANDS_2(Rd, Rn){\
 	result = Rd & Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define ANDS(Rd, Rn, Rm){\
+#define ANDS_3(Rd, Rn, Rm){\
 	result = Rn & Rm;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
 	Rd = Rn & Rm;\
 	g_cycle_count += 1;\
 }
-#define ASRS(Rd,Rn){\
+#define ASRS_2(Rd,Rn){\
 if ((int32_t)Rd < 0 && (int32_t)Rn > 0)\
 	result = (int32_t)Rd >> (int32_t)Rn | ~(~0U >> (int32_t)Rn);\
 else\
@@ -104,7 +75,7 @@ Z_flag = (result == 0);\
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define ASRS(Rd,Rn,Rm){\
+#define ASRS_3(Rd,Rn,Rm){\
 if ((int32_t)Rn < 0 && (int32_t)Rm > 0)\
 	result = (int32_t)Rn >> (int32_t)Rm | ~(~0U >> (int32_t)Rm); \
 else\
@@ -116,9 +87,9 @@ Z_flag = (result == 0); \
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define BIC(Rd, Rn) Rd = Rd & ~Rn; g_cycle_count += 1;
-#define BIC(Rd, Rn, Rm) Rd = Rn & ~Rm; g_cycle_count += 1;
-#define BICS(Rd, Rn){\
+#define BIC_2(Rd, Rn) Rd = Rd & ~Rn; g_cycle_count += 1;
+#define BIC_3(Rd, Rn, Rm) Rd = Rn & ~Rm; g_cycle_count += 1;
+#define BICS_2(Rd, Rn){\
 	result = Rd & ~Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
@@ -126,7 +97,7 @@ g_cycle_count += 1;\
 	g_cycle_count += 1;\
 }
 
-#define BICS(Rd, Rn, Rm){\
+#define BICS_3(Rd, Rn, Rm){\
 	result = Rn & ~Rm;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
@@ -134,116 +105,275 @@ g_cycle_count += 1;\
 	g_cycle_count += 1;\
 }
 #define BX_LR g_cycle_count += 3; return;
-#define CMP(Rd, Rn){\
+#define CMP_2(Rd, Rn){\
 	result = Rd - Rn;\
 	N_flag = (result & (1 & 31));\
 	Z_flag = (result == 0);\
-	C_flag = !(operand2 > operand1);\
+	C_flag = !(Rn > Rd);\
 	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 	g_cycle_count += 1;\
 }
-#define CMN(Rd,Rn){\
+#define CMN_2(Rd,Rn){\
 	result = Rd - ~Rn;\
 	N_flag = (result & (1 & 31));\
 	Z_flag = (result == 0);\
-	C_flag = !(operand2 > operand1);\
+	C_flag = !(Rn > Rd);\
 	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 	g_cycle_count += 1;\
 }
-#define EOR(Rd, Rn) Rd = Rd ^ Rn; g_cycle_count += 1;
-#define EOR(Rd,Rn,Rm) Rd = Rn ^ Rm; g_cycle_count += 1;
-#define EORS(Rd, Rn){\
+#define EOR_2(Rd, Rn) Rd = Rd ^ Rn; g_cycle_count += 1;
+#define EOR_3(Rd,Rn,Rm) Rd = Rn ^ Rm; g_cycle_count += 1;
+#define EORS_2(Rd, Rn){\
 	result = Rd ^ Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0); \
 	Rd = result; \
 	g_cycle_count += 1;\
 }
-#define EORS(Rd, Rn, Rm){\
+#define EORS_3(Rd, Rn, Rm){\
 	result = Rn ^ Rm;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0); \
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define LDR(...)VFUNC(LDR,__VA_ARGS__)
-#define LDR2(reg,address){\
-reg = map -> read(address, WORD);\
+#define LDMIA(base_reg, reg_vector){\
+if (reg_vector & (1 << 7)) {\
+		LDR_2(r0, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 6)) {\
+		LDR_2(r1, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 5)) {\
+		LDR_2(r2, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 4)) {\
+		LDR_2(r3, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 3)) {\
+		LDR_2(r4, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 2)) {\
+		LDR_2(r5, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 1)) {\
+		LDR_2(r6, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 0)) {\
+		LDR_2(r7, base_reg);\
+		base_reg += 4;\
+}\
+}
+#define LDR_2(reg,address){\
+reg = map -> read(address, Size::WORD);\
+get_io_mutex(); \
+supervisor(); \
+g_cycle_count += 2;\
+}
+#define LDRB_2(reg,address){\
+reg = map -> read(address, Size::BYTE);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
-#define LDRB(reg,address){\
-reg = map -> read(address, BYTE);\
+#define LDRH_2(reg,address){\
+reg = map -> read(address, Size::HALF_WORD);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
-#define LDRH(reg,address){\
-reg = map -> read(address, HALF_WORD);\
+#define LDR_3(reg,rg_addr, offset){\
+reg = map -> read((unsigned)(rg_addr+offset), Size::WORD);\
+get_io_mutex(); \
+supervisor(); \
+g_cycle_count += 2;\
+}
+#define LDRB_3(reg,address){\
+reg = map -> read((unsigned)(rg_addr+offset), Size::BYTE);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
-#define MOV(Rd, Rn) Rd = Rn; g_cycle_count += 1;
-#define MOVS(Rd, Rn){\
+#define LDRH_3(reg,address){\
+reg = map -> read((rg_addr+offset), Size::HALF_WORD);\
+supervisor();\
+get_io_mutex(); \
+g_cycle_count += 2;\
+}
+#define LSRS_2(Rd,Rn){\
+	result = Rd >> Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSRS_3(Rd, Rn, Rm){\
+	result = Rn >> Rm;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSLS_2(Rd,Rn){\
+	result = Rd << Rn;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define LSLS_3(Rd, Rn, Rm){\
+	result = Rn << Rm;\
+	N_flag = (result & (1 & 31));\
+	Z_flag = (result == 0);\
+	C_flag = (result & (1 << 32));\
+	Rd = result;\
+	g_cycle_count += 1;\
+}
+#define MOV_2(Rd, Rn) Rd = Rn; g_cycle_count += 1;
+#define MOVS_2(Rd, Rn){\
 	Rd = Rn;\
 	N_flag = (Rd & (1 << 31));\
 	Z_flag = (Rd == 0);\
 	g_cycle_count += 1;\
 }
-#define MVNS(Rd, Rn){\
+#define MVNS_2(Rd, Rn){\
 	Rd = ~Rn;\
 	N_flag = (Rd & (1 << 31));\
 	Z_flag = (Rd == 0);\
 	g_cycle_count += 1;\
 }
-#define MULS(Rd, Rn){\
+#define MULS_2(Rd, Rn){\
 result = Rd * Rn;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define MULS(Rd,Rn,Rm){\
+#define MULS_3(Rd,Rn,Rm){\
 result = Rn * Rm;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define MVN(Rd, Rn) Rd = ~Rn; g_cycle_count += 1;
-#define ORR(Rd, Rn) Rd = Rd | Rn; g_cycle_count += 1;
-#define ORR(Rd,Rn,Rm) Rd = Rn | Rm; g_cycle_count += 1;
-#define ORRS(Rd, Rn){\
+#define MVN_2(Rd, Rn) Rd = ~Rn; g_cycle_count += 1;
+#define ORR_2(Rd, Rn) Rd = Rd | Rn; g_cycle_count += 1;
+#define ORR_3(Rd,Rn,Rm) Rd = Rn | Rm; g_cycle_count += 1;
+#define ORRS_2(Rd, Rn){\
 	result = Rd | Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0); \
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define ORRS(Rd,Rn,Rm){\
+#define ORRS_3(Rd,Rn,Rm){\
 	result = Rn | Rm;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0); \
 	Rd = result;\
 	g_cycle_count += 1;\
 };
-#define ORNS(Rd,Rn){\
+#define ORNS_2(Rd,Rn){\
 	result = Rd | ~Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define ORNS(Rd,Rn,Rm){\
+#define ORNS_3(Rd,Rn,Rm){\
 	result = Rn | ~Rm;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define RORS(Rd,Rn){\
+#define PUSH(SP, reg_vector) {\
+if (reg_vector & (1 << 8)) {\
+		STR_2(r0, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 7)) {\
+		STR_2(r1, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 6)) {\
+		STR_2(r2, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 5)) {\
+		STR_2(r3, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 4)) {\
+		STR_2(r4, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 3)) {\
+		STR_2(r5, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 2)) {\
+		STR_2(r6, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 1)) {\
+		STR_2(r7, SP); \
+		SP -= 4; \
+}\
+if (reg_vector & (1 << 0)) {\
+		STR_2(LR, SP); \
+		SP -= 4; \
+}\
+}
+#define POP(SP, reg_vector){\
+if (reg_vector & (1 << 8)) {\
+		LDR_2(r0, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 7)) {\
+		LDR_2(r1, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 6)) {\
+		LDR_2(r2, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 5)) {\
+		LDR_2(r3, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 4)) {\
+		LDR_2(r4, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 3)) {\
+		LDR_2(r5, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 2)) {\
+		LDR_2(r6, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 1)) {\
+		LDR_2(r7, SP); \
+		SP += 4; \
+}\
+if (reg_vector & (1 << 0)) {\
+		LDR_2(PC, SP); \
+		SP += 4; \
+}\
+}
+#define RORS_2(Rd,Rn){\
 	result = ((uint32_t)Rd >> (uint32_t)Rn) | ((uint32_t)Rd) << (32 - (uint32_t)Rn);\
 	if (Rn)\
 		C_flag = (result & (1 << Rn));\
@@ -252,7 +382,7 @@ g_cycle_count += 1;\
 	Rd = result;\
 	g_cycle_count += 1;\
 };
-#define RORS(Rd,Rn,Rm){\
+#define RORS_3(Rd,Rn,Rm){\
 	result = ((uint32_t)Rn >> (uint32_t)Rm) | ((uint32_t)Rn) << (32 - (uint32_t)Rm);\
 	if (Rm)\
 		C_flag = (result & (1 << Rm));\
@@ -261,122 +391,165 @@ g_cycle_count += 1;\
 	Rd = result;\
 	g_cycle_count += 1;\
 };
-#define RSB(Rd, Rn) Rd = Rn - Rd; g_cycle_count += 1;
-#define RSB(Rd, Rn, Rm) Rd = Rm - Rn; g_cycle_count += 1;
-#define RSBS(Rd,Rn) {\
+#define RSB_2(Rd, Rn) Rd = Rn - Rd; g_cycle_count += 1;
+#define RSB_3(Rd, Rn, Rm) Rd = Rm - Rn; g_cycle_count += 1;
+#define RSBS_2(Rd,Rn) {\
 result = Rn - Rd;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rd > Rn);\
 V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define RSBS(Rd,Rn,Rm){\
+#define RSBS_3(Rd,Rn,Rm){\
 result = Rm - Rn;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rn > Rm);\
 V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
 }
 //#define RSC(Rd, Rn) Rd = Rn - Rd - carry; Not defined in Thumb mode
 //#define RSC(Rd, Rn, Rm) Rd = Rm - Rn - carry;
-#define SBC(Rd, Rn) Rd = Rd - Rn - 1 + carry; g_cycle_count += 1;
-#define SBC(Rd, Rn,Rm) Rd = Rn - Rm - 1 + carry; g_cycle_count += 1;
-#define SBCS(Rd,Rn){\
+#define SBC_2(Rd, Rn) Rd = Rd - Rn - 1 + carry; g_cycle_count += 1;
+#define SBC_3(Rd, Rn,Rm) Rd = Rn - Rm - 1 + carry; g_cycle_count += 1;
+#define SBCS_2(Rd,Rn){\
 result = Rd - Rn - C_flag;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rn > Rd);\
 V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define SBCS(Rd,Rn, Rm){\
+#define SBCS_3(Rd,Rn, Rm){\
 result = Rn - Rm - C_flag;\
 N_flag = (result & (1 << 31));\
 Z_flag = (result == 0);\
-C_flag = !(operand2 > operand1);\
+C_flag = !(Rm > Rn);\
 V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 Rd = result;\
 g_cycle_count += 1;\
 }
-#define PUSH //todo
-#define STR(value, address){\
- map -> write(value, (unsigned) address, WORD);\
-supervisor();\
-get_io_mutex();\
+#define SXTB_2(Rd,Rm){\
+	lsb_byte = (0xFF & Rm);\
+	if (lsb_byte & (1 << 7))\
+		Rd = (0xFFFFFF00 | lsb_byte;\
+	else\
+		Rd = lsb_byte;\
+	g_cycle_count += 1;\
+}
+#define SXTH_2(Rd,Rm){\
+	lsb_word = (0xFFFF & Rm);\
+	if (lsb_word & (1 << 15))\
+		Rd = (0xFFFF0000 | lsb_word;\
+	else\
+		Rd = lsb_word;\
+	g_cycle_count += 1;\
+}
+#define STR_2(value, address){\
+map -> write(address, (uint32_t) value, Size::WORD);\
+supervisor(); \
+get_io_mutex(); \
 g_cycle_count += 2;\
 }
-#define STRB(value, address){\
- map -> write(value, (unsigned) address, BYTE);\
-supervisor();\
-get_io_mutex();\
+#define STRB_2(value, address){\
+map -> write(address, (unsigned) value, Size::BYTE);\
+supervisor(); \
+get_io_mutex(); \
 g_cycle_count += 2;\
 }
-#define STRH(value, address){\
- map -> write(value, (unsigned) address, HALF_WORD);\
-supervisor();\
-get_io_mutex();\
+#define STRH_2(value, address){\
+map -> write(address, (unsigned) value, Size::HALF_WORD);\
+supervisor(); \
+get_io_mutex(); \
 g_cycle_count += 2;\
 }
-#define SUB(Rd,Rn) Rd = Rd - Rn; g_cycle_count += 1;
-#define SUB(Rd,Rn,Rm) Rd = Rn - Rm; g_cycle_count += 1;
-#define SUBS(Rd, Rn){\
+#define STR_3(value, reg, offset){\
+ map -> write((unsigned)(reg+offset), value, Size::WORD);\
+supervisor(); \
+get_io_mutex(); \
+g_cycle_count += 2;\
+}
+#define STRB_3(value, reg, offset){\
+ map -> write((unsigned)(reg+offset), value, Size::BYTE);\
+supervisor(); \
+get_io_mutex(); \
+g_cycle_count += 2;\
+}
+#define STRH_3(value, reg, offset){\
+ map -> write((unsigned)(reg+offset), value, Size::HALF_WORD);\
+supervisor(); \
+get_io_mutex(); \
+g_cycle_count += 2;\
+}
+#define STMIA(base_reg, reg_vector) {\
+if (reg_vector & (1 << 7)) {\
+		STR_2(r0, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 6)) {\
+		STR_2(r1, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 5)) {\
+		STR_2(r2, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 4)) {\
+		STR_2(r3, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 3)) {\
+		STR_2(r4, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 2)) {\
+		STR_2(r5, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 1)) {\
+		STR_2(r6, base_reg);\
+		base_reg += 4;\
+}\
+if (reg_vector & (1 << 0)) {\
+		STR_2(r7, base_reg);\
+		base_reg += 4;\
+}\
+}
+#define SUB_2(Rd,Rn) Rd = Rd - Rn; g_cycle_count += 1;
+#define SUB_3(Rd,Rn,Rm) Rd = Rn - Rm; g_cycle_count += 1;
+#define SUBS_2(Rd, Rn){\
 	result = Rd - Rn;\
 	N_flag = (result & (1 & 31));\
 	Z_flag = (result == 0);\
-	C_flag = !(operand2 > operand1);\
+	C_flag = !(Rn > Rd);\
 	V_flag = ((result & (1 << 31)) != ((Rd & (1 << 31)) ^ (Rn & (1 << 31))));\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define SUBS(Rd, Rn, Rm){\
+#define SUBS_3(Rd, Rn, Rm){\
 	result = Rn - Rm;\
 	N_flag = (result & (1 & 31));\
 	Z_flag = (result == 0);\
-	C_flag = !(operand2 > operand1);\
+	C_flag = !(Rm > Rn);\
 	V_flag = ((result & (1 << 31)) != ((Rn & (1 << 31)) ^ (Rm & (1 << 31))));\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
-#define TST(Rd,Rn){\
-	result = operand1 & operand2;\
+#define TST_2(Rd,Rn){\
+	result = Rd & Rn;\
 	N_flag = (result & (1 << 31));\
 	Z_flag = (result == 0);\
 	g_cycle_count += 1;\
 }
-#define LSRS(Rd,Rn){\
-	result = Rd >> Rn;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
+#define UXTB_2(Rd,Rm){\
+	Rd = (0xFF & Rm);\
 	g_cycle_count += 1;\
 }
-#define LSRS(Rd, Rn, Rm){\
-	result = Rn >> Rm;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
-	g_cycle_count += 1;\
-}
-#define LSLS(Rd,Rn){\
-	result = Rd << Rn;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
-	g_cycle_count += 1;\
-}
-#define LSLS(Rd, Rn, Rm){\
-	result = Rn << Rm;\
-	N_flag = (result & (1 & 31));\
-	Z_flag = (result == 0);\
-	C_flag = (result & (1 << 32));\
-	Rd = result;\
+#define UXTH_2(Rd,Rm){\
+	Rd = (0xFFFF & Rm);\
 	g_cycle_count += 1;\
 }

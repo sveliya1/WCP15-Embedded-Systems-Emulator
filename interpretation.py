@@ -21,18 +21,13 @@ def findLine(lineNumber):
 		except:
 			pass
 	return ""
-
-with open("parsed.cpp", 'r+') as interprettedFile:
-	content = interprettedFile.read()
-	content.replace("main","main_interpretted")
-	interprettedFile.write(content)
 	
 startName = ""
 
 with open("timing_demo.txt", 'r+') as assemblyFile:
 	content = assemblyFile.read()
 	assemblyFile.seek(0)
-	content = content.replace("main", "main_thread")
+	content = content.replace("main>", "main_thread>")
 	assemblyFile.write(content)
 	assemblyFile.seek(0)
 	nextLine = False
@@ -124,8 +119,8 @@ for line in assembly_file:
 					regVector = regVector + (0b10000000 >> int(line.split()[i].replace('r','').replace(",","")))-1
 					i += 1
 				toWrite += "0b" + "{0:0>9b}".format(regVector)
-			elif(line.split()[i] == "push"):
-				toWrite += "push("
+			elif(line.split()[i] == "PUSH"):
+				toWrite += "PUSH(sp,"
 				i += 1
 				regVector = 0b000000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
@@ -136,8 +131,8 @@ for line in assembly_file:
 						regVector = regVector + (0b100000000 >> int(line.split()[i].replace('r','').replace(",",""))-1)
 						i += 1
 				toWrite += "0b" + "{0:0>10b}".format(regVector)
-			elif(line.split()[i] == "pop"):
-				toWrite += "pop("
+			elif(line.split()[i] == "POP"):
+				toWrite += "POP("
 				i += 1
 				regVector = 0b000000000
 				pcFound = False
@@ -199,12 +194,15 @@ interprettedFile.close()
 with open("parsed.cpp", 'r+') as interprettedFile:
 		content = interprettedFile.read()
 		interprettedFile.seek(0)
-		interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n//#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
+		interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
 		interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, lr, pc, result;\n")
-		interprettedFile.write("bool N_flag, Z_flag, C_flag, V_flag =  false;\n")
+		interprettedFile.write("bool V_flag =  false;\n")
+		interprettedFile.write("bool C_flag =  false;\n")
+		interprettedFile.write("bool Z_flag=  false;\n")
+		interprettedFile.write("bool N_flag =  false;\n")
 		interprettedFile.write("uint64_t g_cycle_count = 0;\n")
 		interprettedFile.write(functionDec)
-		interprettedFile.write("void filler()\n{\n")
+		interprettedFile.write("\nvoid main()\n{\n")
 		interprettedFile.write(startName)
 		interprettedFile.write(content)
 json_file.close()

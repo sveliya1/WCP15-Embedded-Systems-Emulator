@@ -156,7 +156,7 @@ Disassembly of section .text:
  1ce:	4a15      	ldr	r2, [pc, #84]	; (224 <_reset_init+0x104>)
  1d0:	4293      	cmp	r3, r2
  1d2:	d905      	bls.n	1e0 <_reset_init+0xc0>
- 1d4:	f000 f92a 	bl	42c <main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread>
+ 1d4:	f000 f92a 	bl	42c <main_thread>
  1d8:	58a5      	ldr	r5, [r4, r2]
  1da:	3204      	adds	r2, #4
  1dc:	601d      	str	r5, [r3, #0]
@@ -203,7 +203,7 @@ Disassembly of section .text:
  428:	d1fa      	bne.n	420 <delay+0x10>
  42a:	e7f4      	b.n	416 <delay+0x6>
 
-0000042c <main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread>:
+0000042c <main_thread>:
  42c:	b570      	push	{r4, r5, r6, lr}
  42e:	25fa      	movs	r5, #250	; 0xfa
  430:	f000 f80c 	bl	44c <configure_rgbled>
@@ -215,8 +215,8 @@ Disassembly of section .text:
  440:	0028      	movs	r0, r5
  442:	f7ff ffe5 	bl	410 <delay>
  446:	2c08      	cmp	r4, #8
- 448:	d1f6      	bne.n	438 <main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread+0xc>
- 44a:	e7f4      	b.n	436 <main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread+0xa>
+ 448:	d1f6      	bne.n	438 <main+0xc>
+ 44a:	e7f4      	b.n	436 <main+0xa>
 
 0000044c <configure_rgbled>:
  44c:	23a0      	movs	r3, #160	; 0xa0
