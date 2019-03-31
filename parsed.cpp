@@ -19,7 +19,7 @@ void _reset_init();
 void __startup_end();
 void _cfm();
 void delay();
-void main();
+void main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread();
 void configure_rgbled();
 void turn_on_green_led();
 void turn_off_green_led();
@@ -33,6 +33,7 @@ void toggle_blue_led();
 void set_rgbled_color_to();
 void filler()
 {
+_reset_init();
 label_timing_demoout:  ;
 //Could not parse: timing_demoout:     file format elf32-littlearm ;
 //Could not parse: Disassembly of section text: ;
@@ -354,7 +355,7 @@ g_cycle_count++;
  goto label_1e0 ; };// 1d2:	d905      	blsn	1e0 <_reset_init+0xc0> ;
 label_1d4:  ;
 g_cycle_count += 3;
-main();// 1d4:	f000 f92a 	bl	42c <main> ;
+main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread();// 1d4:	f000 f92a 	bl	42c <main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread> ;
 label_1d8:  ;
 LDR_3(r5, r4, r2);// 1d8:	58a5      	ldr	r5, [r4, r2] ;
 label_1da:  ;
@@ -448,7 +449,7 @@ g_cycle_count++;
  {g_cycle_count+=2; //thumb 'narrow' version
  goto label_416 ; };// 42a:	e7f4      	bn	416 <delay+0x6> ;
 }
-void main() 
+void main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread() 
 {label_42c:  ;
 push(0b000011100);// 42c:	b570      	push	r4, r5, r6, lr ;
 label_42e:  ;
@@ -477,11 +478,11 @@ CMP_2(r4, 8);// 446:	2c08      	cmp	r4, #8 ;
 label_448:  ;
 g_cycle_count++;
  if (z_flag == 0) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_438 ; };// 448:	d1f6      	bnen	438 <main+0xc> ;
+ goto label_438 ; };// 448:	d1f6      	bnen	438 <main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread+0xc> ;
 label_44a:  ;
 g_cycle_count++;
  {g_cycle_count+=2; //thumb 'narrow' version
- goto label_436 ; };// 44a:	e7f4      	bn	436 <main+0xa> ;
+ goto label_436 ; };// 44a:	e7f4      	bn	436 <main_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread_thread+0xa> ;
 }
 void configure_rgbled() 
 {label_44c:  ;

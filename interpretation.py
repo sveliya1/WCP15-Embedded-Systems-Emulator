@@ -19,13 +19,36 @@ def findLine(lineNumber):
 			if(line.split()[0] == (lineNumber.replace("(","")+":")):
 				return line
 		except:
-			print("empty line?")
+			pass
 	return ""
 
 with open("parsed.cpp", 'r+') as interprettedFile:
-		content = interprettedFile.read()
-		content.replace("main","main_interpretted")
-		interprettedFile.write(content)
+	content = interprettedFile.read()
+	content.replace("main","main_interpretted")
+	interprettedFile.write(content)
+	
+startName = ""
+
+with open("timing_demo.txt", 'r+') as assemblyFile:
+	content = assemblyFile.read()
+	assemblyFile.seek(0)
+	content = content.replace("main", "main_thread")
+	assemblyFile.write(content)
+	assemblyFile.seek(0)
+	nextLine = False
+	lineNumber = ""
+	for line in assemblyFile:
+		if nextLine:
+			lineSplit = line.split()
+			lineNumber = lineSplit[8] + lineSplit[7] + lineSplit[6] + str(int(lineSplit[5])-1) #TODO grab the right stuff
+			break
+		elif "InterruptVector" in line:
+			nextLine = True 
+	assemblyFile.seek(0)
+	for line in assemblyFile:
+		if len(line.split()) >= 2 and lineNumber in line.split()[0]:
+			startName = line.split()[1].replace("<","").replace(">:","")+"();\n"
+
 
 json_file = open("commandsJSON.json")   
 json_str = json_file.read()             #convert the file into a string
@@ -43,6 +66,8 @@ assemblyContents = assembly_file.readlines()
 assembly_file.seek(0)
 interprettedFile = open("parsed.cpp","w")
 addParentheses = True
+
+
 
 for line in assembly_file:
 	argCount = 0
@@ -62,6 +87,7 @@ for line in assembly_file:
 	#line = line.replace("]","")
 	toWrite = ""
 	commandFound = 0
+	validSinceCheck = 0
 	line = line.replace(";"," ;")
 	line = line.replace("\n"," ;")
 	for i in range(len(line.split())):
@@ -179,6 +205,7 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.write("uint64_t g_cycle_count = 0;\n")
 		interprettedFile.write(functionDec)
 		interprettedFile.write("void filler()\n{\n")
+		interprettedFile.write(startName)
 		interprettedFile.write(content)
 json_file.close()
 assembly_file.close()
