@@ -119,7 +119,7 @@ for line in assembly_file:
 					regVector = regVector + (0b10000000 >> int(line.split()[i].replace('r','').replace(",","")))-1
 					i += 1
 				toWrite += "0b" + "{0:0>9b}".format(regVector)
-			elif(line.split()[i] == "PUSH"):
+			elif(line.split()[i].upper() == "PUSH"):
 				toWrite += "PUSH(sp,"
 				i += 1
 				regVector = 0b000000000
