@@ -163,8 +163,8 @@ for line in assembly_file:
 					break;
 				elif("[" in line.split()[i] and "ldr" in line.split() and "pc" in line):
 					toSet = findLine(line.split()[-3]).split()[-1]
-					toWrite = ""
-
+					toWrite = line.split()[3].replace(",","") + " = " + toSet
+					addParentheses = False
 					argCount += 1
 					break;
 				elif("<" in line.split()[i]):
