@@ -22,6 +22,7 @@
     <Content Include="assignment1_assembly.txt" />
     <Content Include="assignment2_assembly.txt" />
     <Content Include="CommandsJSON.json" />
+    <Content Include="head.txt" />
     <Content Include="macros.h" />
     <Content Include="parsedTest.cpp" />
     <Content Include="timing_demo.txt" />

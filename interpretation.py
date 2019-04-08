@@ -104,7 +104,7 @@ for line in assembly_file:
 					addParentheses = False;
 					break;
 			elif(line.split()[i] == "stmia"):
-				toWrite += "stmia(" + line.split()[i+1].replace("!","")
+				toWrite += "STMIA(" + line.split()[i+1].replace("!","")
 				i = i+2
 				regVector = 0b00000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
@@ -131,8 +131,8 @@ for line in assembly_file:
 						regVector = regVector + (0b100000000 >> int(line.split()[i].replace('r','').replace(",",""))-1)
 						i += 1
 				toWrite += "0b" + "{0:0>10b}".format(regVector)
-			elif(line.split()[i] == "POP"):
-				toWrite += "POP("
+			elif(line.split()[i].upper() == "POP"):
+				toWrite += "POP(sp,"
 				i += 1
 				regVector = 0b000000000
 				pcFound = False
@@ -191,19 +191,27 @@ for line in assembly_file:
 				
 interprettedFile.write("}")
 interprettedFile.close()
+
+head = open("head.txt","r").read()
 with open("parsed.cpp", 'r+') as interprettedFile:
 		content = interprettedFile.read()
 		interprettedFile.seek(0)
-		interprettedFile.write("#include <stdint.h>\n#include \"macros.h\"\n#include <stdio.h>\n#include <iostream>\n#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\nusing namespace std;\n")
-		interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, lr, pc, result;\n")
-		interprettedFile.write("bool V_flag =  false;\n")
-		interprettedFile.write("bool C_flag =  false;\n")
-		interprettedFile.write("bool Z_flag=  false;\n")
-		interprettedFile.write("bool N_flag =  false;\n")
-		interprettedFile.write("uint64_t g_cycle_count = 0;\n")
+		
+		interprettedFile.write("#include <stdio.h>\n#include <math.h>\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include \"memorymap.h\"\n#include \"macros.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n")
 		interprettedFile.write(functionDec)
-		interprettedFile.write("\nvoid main()\n{\n")
-		interprettedFile.write(startName)
+		interprettedFile.write(head)
+
+
+
+		#interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, LR, pc, result;\n")
+		#interprettedFile.write("bool V_flag =  false;\n")
+		#interprettedFile.write("bool C_flag =  false;\n")
+		#interprettedFile.write("bool Z_flag=  false;\n")
+		#interprettedFile.write("bool N_flag =  false;\n")
+		#interprettedFile.write("uint64_t g_cycle_count = 0;\n")
+		#
+		#interprettedFile.write("\nvoid main()\n{\n")
+		#interprettedFile.write(startName)
 		interprettedFile.write(content)
 json_file.close()
 assembly_file.close()

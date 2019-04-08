@@ -45,5 +45,7 @@
   "B": "//goto A1 ;",
   "BL": "//FUNCTION ; ",
   "B.N": "//goto A1 ;",
-  "BCS.N": "//if(!(result & (1 << 31))){ goto A1 ; }"
+  "BCS.N": "//if(!(result & (1 << 31))){ goto A1 ; }",
+  "BICS": "",
+  "POP": ""
 }
