@@ -19,7 +19,7 @@ enum instructions {
 	RORS, MOVS, MVN
 };
 
-uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, LR, PC, result;
+uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result;
 
 uint32_t g_embedded_sys_freq = 1000000000;
 uint32_t supervisor_threshold = 0.1*g_embedded_sys_freq;
@@ -28,8 +28,8 @@ std::condition_variable io_cond;
 std::condition_variable main_thread_io;
 int show_io = 0;
 
-/*
 void io_write(uint32_t address, uint32_t value);
+/*
 void clear_register(uint32_t address, uint32_t value);
 void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
@@ -54,6 +54,88 @@ double get_cpu_time();
 void clear_register(uint32_t address, uint32_t value);
 void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
+
+void io_write(uint32_t address, uint32_t value)
+{
+	switch (address)
+	{
+		//Used for configuring LED
+		//----------------------------
+		//SIM_SCGC5
+	case 0x40048038:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//Pin Control Register (PORTB_PCR18) p.179
+	case 0x4004A048:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//Pin Control Register (PORTB_PCR19)
+	case 0x4004A04C:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//Pin Control Register (PORTD_PCR1)
+	case 0x4004C004:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//Port Data Direction Register (GPIOB_PDDR)
+	case 0x400FF054:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//Port Data Direction Register (GPIOD_PDDR)
+	case 0x400FF0D4:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//----------------------------------
+
+		//Used for configuring switch:
+		//----------------------------------
+		//SIM SCGC5 already gets used by LED 
+
+		//Pin Control Register (PORTA_PCR20)
+	case 0x40049050:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//Port Data Direction Register(GPIOA_PDDR)
+	case 0x400FF014:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+		//-----------------------------------
+
+		//PSOR, PCOR, PTOR registers for LEDs
+		//Green and Red
+	case 0x400FF044: //GPIOB_PSOR 
+		set_register(0x400FF040, value);
+		break;
+	case 0x400FF048: //GPIOB_PCOR
+		clear_register(0x400FF040, value);
+		break;
+	case 0x400FF04C: //GPIOB_PTOR on pg.774
+		toggle_register(0x400FF040, value);
+		break;
+		//Blue LED
+	case 0x400FF0C4: //GPIOD_PSOR
+		set_register(0x400FF0C0, value);
+		break;
+	case 0x400FF0C8:
+		clear_register(0x400FF0C0, value);
+		break;
+	case 0x400FF0CC:
+		toggle_register(0x400FF0C0, value);
+		break;
+
+		//------------------------------
+		//Switch Input Register for Switch
+	case 0x400FF010: //This address needs to be read
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+	default:
+		map -> write(address, (uint32_t) value, Size::WORD);
+		break;
+
+
+	}
+
+}
 
 void clear_register(uint32_t address, uint32_t value)
 {

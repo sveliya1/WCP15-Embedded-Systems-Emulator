@@ -139,42 +139,42 @@ g_cycle_count += 1;\
 }
 #define LDMIA(base_reg, reg_vector){\
 if (reg_vector & (1 << 7)) {\
-		LDR_2(r0, base_reg);\
+		LDR_2(R0, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 6)) {\
-		LDR_2(r1, base_reg);\
+		LDR_2(R1, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 5)) {\
-		LDR_2(r2, base_reg);\
+		LDR_2(R2, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 4)) {\
-		LDR_2(r3, base_reg);\
+		LDR_2(R3, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 3)) {\
-		LDR_2(r4, base_reg);\
+		LDR_2(R4, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 2)) {\
-		LDR_2(r5, base_reg);\
+		LDR_2(R5, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 1)) {\
-		LDR_2(r6, base_reg);\
+		LDR_2(R6, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 0)) {\
-		LDR_2(r7, base_reg);\
+		LDR_2(R7, base_reg);\
 		base_reg += 4;\
 }\
 }
 #define LDR_2(reg,address){\
 reg = map -> read(address, Size::WORD);\
-get_io_mutex(); \
-supervisor(); \
+supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LDRB_2(reg,address){\
@@ -191,8 +191,8 @@ g_cycle_count += 2;\
 }
 #define LDR_3(reg,rg_addr, offset){\
 reg = map -> read((unsigned)(rg_addr+offset), Size::WORD);\
-get_io_mutex(); \
-supervisor(); \
+supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LDRB_3(reg,address){\
@@ -204,7 +204,7 @@ g_cycle_count += 2;\
 #define LDRH_3(reg,address){\
 reg = map -> read((rg_addr+offset), Size::HALF_WORD);\
 supervisor();\
-get_io_mutex(); \
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LSRS_2(Rd,Rn){\
@@ -299,35 +299,35 @@ g_cycle_count += 1;\
 }
 #define PUSH(SP, reg_vector) {\
 if (reg_vector & (1 << 8)) {\
-		STR_2(r0, SP); \
+		STR_2(R0, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 7)) {\
-		STR_2(r1, SP); \
+		STR_2(R1, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 6)) {\
-		STR_2(r2, SP); \
+		STR_2(R2, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 5)) {\
-		STR_2(r3, SP); \
+		STR_2(R3, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 4)) {\
-		STR_2(r4, SP); \
+		STR_2(R4, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 3)) {\
-		STR_2(r5, SP); \
+		STR_2(R5, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 2)) {\
-		STR_2(r6, SP); \
+		STR_2(R6, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 1)) {\
-		STR_2(r7, SP); \
+		STR_2(R7, SP); \
 		SP -= 4; \
 }\
 if (reg_vector & (1 << 0)) {\
@@ -337,35 +337,35 @@ if (reg_vector & (1 << 0)) {\
 }
 #define POP(SP, reg_vector){\
 if (reg_vector & (1 << 8)) {\
-		LDR_2(r0, SP); \
+		LDR_2(R0, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 7)) {\
-		LDR_2(r1, SP); \
+		LDR_2(R1, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 6)) {\
-		LDR_2(r2, SP); \
+		LDR_2(R2, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 5)) {\
-		LDR_2(r3, SP); \
+		LDR_2(R3, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 4)) {\
-		LDR_2(r4, SP); \
+		LDR_2(R4, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 3)) {\
-		LDR_2(r5, SP); \
+		LDR_2(R5, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 2)) {\
-		LDR_2(r6, SP); \
+		LDR_2(R6, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 1)) {\
-		LDR_2(r7, SP); \
+		LDR_2(R7, SP); \
 		SP += 4; \
 }\
 if (reg_vector & (1 << 0)) {\
@@ -450,72 +450,72 @@ g_cycle_count += 1;\
 	g_cycle_count += 1;\
 }
 #define STR_2(value, address){\
-map -> write(address, (uint32_t) value, Size::WORD);\
-supervisor(); \
-get_io_mutex(); \
+ io_write(address,value);\
+ supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRB_2(value, address){\
-map -> write(address, (unsigned) value, Size::BYTE);\
-supervisor(); \
-get_io_mutex(); \
+ map -> write(address, (unsigned) value, Size::BYTE);\
+supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRH_2(value, address){\
-map -> write(address, (unsigned) value, Size::HALF_WORD);\
-supervisor(); \
-get_io_mutex(); \
+ map -> write(address, (unsigned) value, Size::HALF_WORD);\
+supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STR_3(value, reg, offset){\
- map -> write((unsigned)(reg+offset), value, Size::WORD);\
-supervisor(); \
-get_io_mutex(); \
+ io_write((reg+offset),value);\
+ supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRB_3(value, reg, offset){\
  map -> write((unsigned)(reg+offset), value, Size::BYTE);\
-supervisor(); \
-get_io_mutex(); \
+supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRH_3(value, reg, offset){\
  map -> write((unsigned)(reg+offset), value, Size::HALF_WORD);\
-supervisor(); \
-get_io_mutex(); \
+supervisor();\
+get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STMIA(base_reg, reg_vector) {\
 if (reg_vector & (1 << 7)) {\
-		STR_2(r0, base_reg);\
+		STR_2(R0, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 6)) {\
-		STR_2(r1, base_reg);\
+		STR_2(R1, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 5)) {\
-		STR_2(r2, base_reg);\
+		STR_2(R2, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 4)) {\
-		STR_2(r3, base_reg);\
+		STR_2(R3, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 3)) {\
-		STR_2(r4, base_reg);\
+		STR_2(R4, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 2)) {\
-		STR_2(r5, base_reg);\
+		STR_2(R5, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 1)) {\
-		STR_2(r6, base_reg);\
+		STR_2(R6, base_reg);\
 		base_reg += 4;\
 }\
 if (reg_vector & (1 << 0)) {\
-		STR_2(r7, base_reg);\
+		STR_2(R7, base_reg);\
 		base_reg += 4;\
 }\
 }

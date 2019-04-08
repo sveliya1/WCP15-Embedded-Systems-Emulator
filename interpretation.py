@@ -104,7 +104,7 @@ for line in assembly_file:
 					addParentheses = False;
 					break;
 			elif(line.split()[i] == "stmia"):
-				toWrite += "STMIA(" + line.split()[i+1].replace("!","")
+				toWrite += "STMIA(" + line.split()[i+1].replace("!","").upper()
 				i = i+2
 				regVector = 0b00000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
@@ -112,7 +112,7 @@ for line in assembly_file:
 					i += 1
 				toWrite += "0b" + "{0:0>9b}".format(regVector)
 			elif(line.split()[i] == "ldmia"):
-				toWrite += "ldmia(" + line.split()[i+1].replace("!","")
+				toWrite += "ldmia(" + line.split()[i+1].replace("!","").upper()
 				i = i+2
 				regVector = 0b00000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
@@ -120,7 +120,8 @@ for line in assembly_file:
 					i += 1
 				toWrite += "0b" + "{0:0>9b}".format(regVector)
 			elif(line.split()[i].upper() == "PUSH"):
-				toWrite += "PUSH(sp,"
+				toWrite += "PUSH("
+				toWrite += line.split()[i+1].replace("!","").upper()
 				i += 1
 				regVector = 0b000000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
@@ -132,7 +133,7 @@ for line in assembly_file:
 						i += 1
 				toWrite += "0b" + "{0:0>10b}".format(regVector)
 			elif(line.split()[i].upper() == "POP"):
-				toWrite += "POP(sp,"
+				toWrite += "POP(SP,"
 				i += 1
 				regVector = 0b000000000
 				pcFound = False
@@ -163,7 +164,7 @@ for line in assembly_file:
 					break;
 				elif("[" in line.split()[i] and "ldr" in line.split() and "pc" in line):
 					toSet = findLine(line.split()[-3]).split()[-1]
-					toWrite = line.split()[3].replace(",","") + " = " + toSet
+					toWrite = line.split()[3].replace(",","").upper() + " = " + toSet
 					addParentheses = False
 					argCount += 1
 					break;
@@ -171,13 +172,13 @@ for line in assembly_file:
 					toWrite += "\"" + line.split()[i] + "\" ";
 					argCount += 1
 				elif("#" in line.split()[i]):
-					toWrite += line.split()[i].replace("#","").replace("[","").replace("]","") +","
+					toWrite += line.split()[i].replace("#","").replace("[","").replace("]","").upper() +","
 					argCount += 1
 				elif("r" or "pc" in line.split()[i]):
-					toWrite += line.split()[i].replace("[","").replace("]","") + " "
+					toWrite += line.split()[i].replace("[","").replace("]","").upper() + " "
 					argCount += 1
 				else:
-					toWrite += "\"" + line.split()[i].replace(",","") + "\", "
+					toWrite += "\"" + line.split()[i].replace(",","").upper() + "\", "
 					argCount += 1
 	if(toWrite != ""):
 		toWrite = toWrite.replace("*insertNumber*", str(argCount))
