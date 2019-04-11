@@ -195,8 +195,8 @@ supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\
 }
-#define LDRB_3(reg,address){\
-reg = map -> read((unsigned)(rg_addr+offset), Size::BYTE);\
+#define LDRB_3(reg,rg_addr, offset){\
+reg = map -> read((unsigned)(rg_addr+offset), Size::WORD);\
 supervisor();\
 get_io_mutex();\
 g_cycle_count += 2;\

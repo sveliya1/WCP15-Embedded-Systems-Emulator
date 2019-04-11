@@ -120,8 +120,8 @@ for line in assembly_file:
 					i += 1
 				toWrite += "0b" + "{0:0>9b}".format(regVector)
 			elif(line.split()[i].upper() == "PUSH"):
-				toWrite += "PUSH("
-				toWrite += line.split()[i+1].replace("!","").upper()
+				toWrite += "PUSH(SP,"
+				#toWrite += line.split()[i+1].replace("!","").upper()
 				i += 1
 				regVector = 0b000000000
 				while(not("]" in line.split()[i]) and not(";" in line.split()[i])):
@@ -181,11 +181,13 @@ for line in assembly_file:
 					toWrite += "\"" + line.split()[i].replace(",","").upper() + "\", "
 					argCount += 1
 	if(toWrite != ""):
+		if(toWrite[-1] == ","):
+			toWrite = toWrite[:-1]
 		toWrite = toWrite.replace("*insertNumber*", str(argCount))
 		if(addParentheses):
-			interprettedFile.write(toWrite[:-1] + ");")
+			interprettedFile.write(toWrite + ");")
 		else:
-			interprettedFile.write(toWrite[:-1] + ";")	
+			interprettedFile.write(toWrite + ";")	
 		interprettedFile.write("//" + line + "\n")
 	else:
 		interprettedFile.write("//Could not parse: " + line + "\n")
