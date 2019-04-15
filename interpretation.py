@@ -8,6 +8,37 @@ def BLInsert(line, BLIndex):
 			return subString[1:-1]+"( "
 	return "//ERROR PARSING BL "
 
+def GetIncludes():
+	includesJSON = ""
+	toReturn = ""
+	with open("hardware_features.json", 'r') as includeFile: 
+		jsonText = includeFile.read()             #convert the file into a string
+		includesJson = json.loads(jsonText)   
+	for listObj in includesJson:
+		toReturn += "#include \"" + listObj["Header_file"] + "\"\n"
+	return toReturn
+
+def GetThreads():
+	includesJSON = ""
+	toReturn = ""
+	with open("hardware_features.json", 'r') as includeFile: 
+		jsonText = includeFile.read()             #convert the file into a string
+		includesJson = json.loads(jsonText)   
+	for listObj in includesJson:
+		toReturn += listObj["Thread Function"] + ";\n"
+	return toReturn
+
+def GetISR():
+	includesJSON = ""
+	toReturn = ""
+	with open("hardware_features.json", 'r') as includeFile: 
+		jsonText = includeFile.read()             #convert the file into a string
+		includesJson = json.loads(jsonText)   
+	for listObj in includesJson:
+		if(listObj["ISR"] != "None"):
+			toReturn += listObj["ISR"] + "\n"
+	return toReturn
+
 def BranchInsert(line, BIndex):
 	return(" goto label_" + line.split()[BIndex + 1] + " ")
 	return "\\ERROR PARSING BRANCH"
@@ -201,9 +232,15 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.seek(0)
 		
 		interprettedFile.write("#include <stdio.h>\n#include <math.h>\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include \"memorymap.h\"\n#include \"macros.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n")
+		interprettedFile.write(GetIncludes())
 		interprettedFile.write(functionDec)
+		interprettedFile.write("void ISR();")
+		interprettedFile.write("\nvoid ISR()\n{\n")
+		interprettedFile.write(GetISR())
+		interprettedFile.write("}\n")
 		interprettedFile.write(head)
-
+		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\n//burn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\n//SP = init_sp();\n_reset_init();\n")
+		interprettedFile.write(GetThreads())
 
 
 		#interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, LR, pc, result;\n")

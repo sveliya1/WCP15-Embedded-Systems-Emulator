@@ -269,17 +269,3 @@ void supervisor() {
 
 }
 
-void main()
-{
-
-	std::cout << "Hello" << std::endl;
-	map->addDevice(flash);
-	map->addDevice(ram);
-	map->addDevice(aips);
-	map->addDevice(gpio);
-	map->addDevice(private_peri);
-
-	//burn_flash_to_mem(flash);
-	std::cout << "Memory Allocate is good" << std::endl;
-	//SP = init_sp();
-_reset_init();

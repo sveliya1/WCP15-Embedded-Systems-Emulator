@@ -8,6 +8,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include "switch.h"
+#include "switch_INT.h"
 void InterruptVector();
 void Default_Handler();
 void HardFault_Handler();
@@ -28,6 +30,11 @@ void turn_on_blue_led();
 void turn_off_blue_led();
 void toggle_blue_led();
 void set_rgbled_color_to();
+void ISR();
+void ISR()
+{
+if (BUTTON) { PORTA_IRQHandler(); }
+}
 
 
 #define FLASH_START 0x00000000
@@ -301,18 +308,19 @@ void supervisor() {
 
 void main()
 {
-
-	std::cout << "Hello" << std::endl;
-	map->addDevice(flash);
-	map->addDevice(ram);
-	map->addDevice(aips);
-	map->addDevice(gpio);
-	map->addDevice(private_peri);
-
-	//burn_flash_to_mem(flash);
-	std::cout << "Memory Allocate is good" << std::endl;
-	//SP = init_sp();
-_reset_init();label_timing_demoout:  ;
+std::cout << "Hello" << std::endl;
+map->addDevice(flash);
+map->addDevice(ram);
+map->addDevice(aips);
+map->addDevice(gpio);
+map->addDevice(private_peri);
+//burn_flash_to_mem(flash);
+std::cout << "Memory Allocate is good" << std::endl;
+//SP = init_sp();
+_reset_init();
+std::thread button(check_button);
+std::thread button(check_button_INT);
+label_timing_demoout:  ;
 //Could not parse: timing_demoout:     file format elf32-littlearm ;
 //Could not parse: Disassembly of section text: ;
 }
