@@ -21,8 +21,9 @@ enum instructions {
 
 uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result;
 
-uint32_t g_embedded_sys_freq = 1000000000;
-uint32_t supervisor_threshold = 0.1*g_embedded_sys_freq;
+uint64_t g_embedded_sys_freq = 1000000000;
+uint64_t supervisor_threshold = 0.1*g_embedded_sys_freq;
+uint64_t suspervisor_increment = suspervisor_threshold;
 std::mutex io_lock;
 std::condition_variable io_cond;
 std::condition_variable main_thread_io;
@@ -35,7 +36,8 @@ void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
 */
 uint8_t lsb_byte;
-uint32_t g_cycle_count, lsb_word;
+uint64_t g_cycle_count;
+uint32_t lsb_word;
 bool N_flag, C_flag, Z_flag, V_flag;
 MemoryMap* map = new MemoryMap();
 RAMDevice* gpio = new RAMDevice(GPIO_START, GPIO_SIZE, ENDIAN_LITTLE);
@@ -58,7 +60,7 @@ void toggle_register(uint32_t address, uint32_t value);
 auto start = std::chrono::high_resolution_clock::now();
 auto finish= std::chrono::high_resolution_clock::now();
 
-void io_write(uint32_t address, uint32_t value)
+/*void io_write(uint32_t address, uint32_t value)
 {
 	switch (address)
 	{
@@ -138,7 +140,7 @@ void io_write(uint32_t address, uint32_t value)
 
 	}
 
-}
+}*/
 
 void clear_register(uint32_t address, uint32_t value)
 {
@@ -160,20 +162,6 @@ void toggle_register(uint32_t address, uint32_t value)
 	map->write(address, (uint32_t)port_reg, Size::WORD);
 }
 
-double get_cpu_time() {
-	FILETIME a, b, c, d;
-	if (GetProcessTimes(GetCurrentProcess(), &a, &b, &c, &d) != 0) {
-		//  Returns total user time.
-		//  Can be tweaked to include kernel times as well.
-		return
-			(double)(d.dwLowDateTime |
-			((unsigned long long)d.dwHighDateTime << 32)) * 0.0000001;
-	}
-	else {
-		//  Handle error
-		return 0;
-	}
-}
 
 uint32_t read_register(uint32_t address, uint32_t bit_value)
 {
