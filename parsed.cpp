@@ -8,6 +8,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <chrono>
 #include "switch.h"
 #include "switch_INT.h"
 void InterruptVector();
@@ -91,6 +92,9 @@ double get_cpu_time();
 void clear_register(uint32_t address, uint32_t value);
 void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
+
+auto start = std::chrono::high_resolution_clock::now();
+auto finish= std::chrono::high_resolution_clock::now();
 
 void io_write(uint32_t address, uint32_t value)
 {
@@ -317,6 +321,7 @@ map->addDevice(private_peri);
 //burn_flash_to_mem(flash);
 std::cout << "Memory Allocate is good" << std::endl;
 //SP = init_sp();
+start = std::chrono::iggh_resolution_clock::now();
 _reset_init();
 std::thread button(check_button);
 std::thread button(check_button_INT);

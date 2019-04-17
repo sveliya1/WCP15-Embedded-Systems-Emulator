@@ -55,6 +55,9 @@ void clear_register(uint32_t address, uint32_t value);
 void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
 
+auto start = std::chrono::high_resolution_clock::now();
+auto finish= std::chrono::high_resolution_clock::now();
+
 void io_write(uint32_t address, uint32_t value)
 {
 	switch (address)

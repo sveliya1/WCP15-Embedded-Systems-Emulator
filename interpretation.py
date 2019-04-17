@@ -231,7 +231,7 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		content = interprettedFile.read()
 		interprettedFile.seek(0)
 		
-		interprettedFile.write("#include <stdio.h>\n#include <math.h>\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include \"memorymap.h\"\n#include \"macros.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n")
+		interprettedFile.write("#include <stdio.h>\n#include <math.h>\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include \"memorymap.h\"\n#include \"macros.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#include <chrono>\n")
 		interprettedFile.write(GetIncludes())
 		interprettedFile.write(functionDec)
 		interprettedFile.write("void ISR();")
@@ -239,7 +239,7 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.write(GetISR())
 		interprettedFile.write("}\n")
 		interprettedFile.write(head)
-		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\n//burn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\n//SP = init_sp();\n_reset_init();\n")
+		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\n//burn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\n//SP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n_reset_init();\n")
 		interprettedFile.write(GetThreads())
 
 
