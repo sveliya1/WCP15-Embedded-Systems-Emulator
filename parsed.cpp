@@ -4,17 +4,17 @@
 #include <thread>
 #include <mutex>
 #include "memorymap.h"
+#include "flash.h"
 #include "macros.h"
+#include "IO_Register.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
 #include <chrono>
-#include "switch.h"
-#include "switch_INT.h"
+#include "rgbled.h"
 void InterruptVector();
 void Default_Handler();
 void HardFault_Handler();
-void _stop_init();
 void _reset_init();
 void __startup_end();
 void _cfm();
@@ -34,149 +34,48 @@ void set_rgbled_color_to();
 void ISR();
 void ISR()
 {
-if (BUTTON) { PORTA_IRQHandler(); }
 }
 
 
+//All addresses are 0 addressable, add 1 to all of their sizes
 #define FLASH_START 0x00000000
-#define FLASH_SIZE 0x07FFFFFF
-#define RAM_START 0x1FFFF000-1
-#define RAM_SIZE 0x20002FFF-RAM_START
+#define FLASH_SIZE 0x07FFFFFF+1
+#define RAM_START 0x1FFFF000
+#define RAM_SIZE 0x20002FFF+1-RAM_START
 #define AIPS_START 0x40000000
-#define AIPS_SIZE 0x4007FFFF-AIPS_START
-
+#define AIPS_SIZE 0x4007FFFF+1-AIPS_START
 
 #define GPIO_START 0x400FF000 
-#define GPIO_SIZE 0x400FFFFF-GPIO_START
+#define GPIO_SIZE 0x400FFFFF+1-GPIO_START
 
 #define PRIVATE_PERI_START 0xE0000000
-#define PRIVATE_SIZE 0xE00FFFFF - PRIVATE_PERI_START
+#define PRIVATE_SIZE 0xE00FFFFF+1 - PRIVATE_PERI_START
 
-enum instructions {
-	ADDS, SUBS, ANDS, EORS, ORRS, BICS, ORNS, ADCS, RSBS, SBCS, CMP, CMN, MULS, TST, LSLS, LSRS, ASRS,
-	RORS, MOVS, MVN
-};
+uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result = 0;
 
-uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result;
+uint64_t g_embedded_sys_freq = 48000000;
+uint64_t supervisor_threshold =  0.5*g_embedded_sys_freq;
+uint64_t supervisor_increment = supervisor_threshold;
 
-uint32_t g_embedded_sys_freq = 1000000000;
-uint32_t supervisor_threshold = 0.1*g_embedded_sys_freq;
-std::mutex io_lock;
-std::condition_variable io_cond;
-std::condition_variable main_thread_io;
-int show_io = 0;
-
-void io_write(uint32_t address, uint32_t value);
-/*
-void clear_register(uint32_t address, uint32_t value);
-void set_register(uint32_t address, uint32_t value);
-void toggle_register(uint32_t address, uint32_t value);
-*/
 uint8_t lsb_byte;
-uint32_t g_cycle_count, lsb_word;
+uint64_t g_cycle_count;
+uint32_t lsb_word;
 bool N_flag, C_flag, Z_flag, V_flag;
 MemoryMap* map = new MemoryMap();
 RAMDevice* gpio = new RAMDevice(GPIO_START, GPIO_SIZE, ENDIAN_LITTLE);
 RAMDevice* aips = new RAMDevice(AIPS_START, AIPS_SIZE, ENDIAN_LITTLE);
 RAMDevice* ram = new RAMDevice(RAM_START, RAM_SIZE, ENDIAN_LITTLE);
 RAMDevice* private_peri = new RAMDevice(PRIVATE_PERI_START, PRIVATE_SIZE, ENDIAN_LITTLE);
-
 ROMDevice* flash = new ROMDevice(FLASH_START, FLASH_SIZE, ENDIAN_LITTLE);
 
-void set_rgbled_color_to();
 void supervisor();
-void led_read_state();
-void get_io_mutex();
 uint32_t read_register(uint32_t address, uint32_t bit_value);
-double get_cpu_time();
 void clear_register(uint32_t address, uint32_t value);
 void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
 
 auto start = std::chrono::high_resolution_clock::now();
 auto finish= std::chrono::high_resolution_clock::now();
-
-void io_write(uint32_t address, uint32_t value)
-{
-	switch (address)
-	{
-		//Used for configuring LED
-		//----------------------------
-		//SIM_SCGC5
-	case 0x40048038:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Pin Control Register (PORTB_PCR18) p.179
-	case 0x4004A048:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Pin Control Register (PORTB_PCR19)
-	case 0x4004A04C:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Pin Control Register (PORTD_PCR1)
-	case 0x4004C004:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Port Data Direction Register (GPIOB_PDDR)
-	case 0x400FF054:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Port Data Direction Register (GPIOD_PDDR)
-	case 0x400FF0D4:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//----------------------------------
-
-		//Used for configuring switch:
-		//----------------------------------
-		//SIM SCGC5 already gets used by LED 
-
-		//Pin Control Register (PORTA_PCR20)
-	case 0x40049050:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Port Data Direction Register(GPIOA_PDDR)
-	case 0x400FF014:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//-----------------------------------
-
-		//PSOR, PCOR, PTOR registers for LEDs
-		//Green and Red
-	case 0x400FF044: //GPIOB_PSOR 
-		set_register(0x400FF040, value);
-		break;
-	case 0x400FF048: //GPIOB_PCOR
-		clear_register(0x400FF040, value);
-		break;
-	case 0x400FF04C: //GPIOB_PTOR on pg.774
-		toggle_register(0x400FF040, value);
-		break;
-		//Blue LED
-	case 0x400FF0C4: //GPIOD_PSOR
-		set_register(0x400FF0C0, value);
-		break;
-	case 0x400FF0C8:
-		clear_register(0x400FF0C0, value);
-		break;
-	case 0x400FF0CC:
-		toggle_register(0x400FF0C0, value);
-		break;
-
-		//------------------------------
-		//Switch Input Register for Switch
-	case 0x400FF010: //This address needs to be read
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-	default:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-
-
-	}
-
-}
 
 void clear_register(uint32_t address, uint32_t value)
 {
@@ -198,20 +97,6 @@ void toggle_register(uint32_t address, uint32_t value)
 	map->write(address, (uint32_t)port_reg, Size::WORD);
 }
 
-double get_cpu_time() {
-	FILETIME a, b, c, d;
-	if (GetProcessTimes(GetCurrentProcess(), &a, &b, &c, &d) != 0) {
-		//  Returns total user time.
-		//  Can be tweaked to include kernel times as well.
-		return
-			(double)(d.dwLowDateTime |
-			((unsigned long long)d.dwHighDateTime << 32)) * 0.0000001;
-	}
-	else {
-		//  Handle error
-		return 0;
-	}
-}
 
 uint32_t read_register(uint32_t address, uint32_t bit_value)
 {
@@ -221,92 +106,26 @@ uint32_t read_register(uint32_t address, uint32_t bit_value)
 	return register_value;
 }
 
-void get_io_mutex() {
-
-	//std::cout << "Show IO: " << show_io << std::endl;
-	std::unique_lock<std::mutex> locker(io_lock);
-	main_thread_io.wait(locker, []() { return !show_io; });
-	//std::cout << "Show IO: " << show_io << std::endl;
-	show_io = 1;
-	io_cond.notify_one();
-	locker.unlock();
-
-}
-
-void led_read_state()
-{
-
-	while (1) {
-		std::unique_lock<std::mutex> locker(io_lock);
-		io_cond.wait(locker, []() { return show_io; }); //Still can have spurious wakeups
-		//Read the LED values
-		//std::cout << "Show IO: " << show_io << std::endl;
-		uint32_t redled_value = read_register(0x400FF040, 18) << 2; //11 /
-		uint32_t greenled_value = read_register(0x400FF040, 19) << 1; //12
-		uint32_t blueled_value = read_register(0x400FF0c0, 1); //8
-		//std::cout << redled_value << "\n" << greenled_value << "\n" << blueled_value << "\n";
-		uint32_t result = redled_value + greenled_value + blueled_value;
-		switch (result)
-		{
-		case 0:
-			std::cout << "LED is WHITE\n";
-			break;
-		case 1: //001
-			std::cout << "LED is YELLOW\n";
-			break;
-		case 2:
-			std::cout << "LED is MAGENTA\n";
-			break;
-		case 3:
-			std::cout << "LED is RED\n";
-			break;
-		case 4:
-			std::cout << "LED is CYAN\n";
-			break;
-
-		case 5:
-			std::cout << "LED is GREEN\n";
-			break;
-
-		case 6:
-			std::cout << "LED is BLUE\n";
-			break;
-		case 7:
-			std::cout << "LED is BLACK\n";
-			break;
-		default:
-			std::cout << "Switch statement is broken...\n";
-			break;
-		}
-		show_io = 0;
-		locker.unlock();
-		main_thread_io.notify_one();
-	}
-}
-
 void supervisor() {
 
-	if (g_cycle_count < supervisor_threshold)
-		return;
-
-	static double previous_CPU_time = 0;
-	long double embedded_sys_CPU_time = (long double)g_cycle_count / g_embedded_sys_freq; // seconds
-	//double wall_clock_time = get_wall_time();
-	//std::cout << "Wall Clock Time: " << wall_clock_time << std::endl;
-	double host_CPU_time = get_cpu_time();
-	double CPU_time_bt_call = host_CPU_time - previous_CPU_time;
-	double sleep_time = embedded_sys_CPU_time - CPU_time_bt_call;
+	static uint64_t previous_g_cycle_count = 0;
+	double embedded_sys_CPU_time = (double) (g_cycle_count - previous_g_cycle_count) / (double) g_embedded_sys_freq;
+	finish = std::chrono::high_resolution_clock::now();
+	double wall_clock_time = (double) (std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() * pow(10, -9));
+	double sleep_time = embedded_sys_CPU_time - wall_clock_time;
 	if (sleep_time > 0) {
-		//std::cout << "Sleep Time: " << sleep_time << std::endl;
-		Sleep((sleep_time) * 1000);
+		auto sleep_start = std::chrono::high_resolution_clock::now();
+		auto sleep_finish = std::chrono::high_resolution_clock::now();
+		double time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+		while (time_slept < sleep_time) {
+			 sleep_finish = std::chrono::high_resolution_clock::now();
+			 time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+		}
 	}
-	previous_CPU_time = host_CPU_time;
+	start = std::chrono::high_resolution_clock::now();
+	previous_g_cycle_count = g_cycle_count;
+	supervisor_threshold += supervisor_increment;
 	std::cout << "Sleep Time: " << sleep_time << std::endl;
-	//std::cout << "Host CPU TIME: " << CPU_time_bt_call << std::endl;
-	//std::cout << "Embedded CPU Time: " << embedded_sys_CPU_time << std::endl;
-	//std::cout << "Cycle Count: " << g_cycle_count << std::endl;
-	//std::cout << "Embedded System Freq: " << g_embedded_sys_freq << std::endl;
-	g_cycle_count = 0;
 
 }
 
@@ -318,20 +137,19 @@ map->addDevice(ram);
 map->addDevice(aips);
 map->addDevice(gpio);
 map->addDevice(private_peri);
-//burn_flash_to_mem(flash);
+burn_flash_to_mem(flash);
 std::cout << "Memory Allocate is good" << std::endl;
-//SP = init_sp();
-start = std::chrono::iggh_resolution_clock::now();
+SP = init_sp();
+start = std::chrono::high_resolution_clock::now();
+std::thread led(led_read_state,map);
 _reset_init();
-std::thread button(check_button);
-std::thread button(check_button_INT);
 label_timing_demoout:  ;
 //Could not parse: timing_demoout:     file format elf32-littlearm ;
 //Could not parse: Disassembly of section text: ;
 }
 void InterruptVector() 
 {label_0:  ;
-//Could not parse:    0:	00 30 00 20 21 01 00 00 c1 00 00 00 c3 00 00 00     0 ! ;
+//Could not parse:    0:	00 30 00 20 c9 00 00 00 c1 00 00 00 c3 00 00 00     0  ;
 label_10:  ;
 //Could not parse:   10:	c1 00 00 00 c1 00 00 00 c1 00 00 00 c1 00 00 00      ;
 label_20:  ;
@@ -366,337 +184,75 @@ void HardFault_Handler()
 g_cycle_count++;
  {g_cycle_count+=2; //thumb 'narrow' version
  goto label_c2 ; } ;//  c2:	e7fe      	bn	c2 <HardFault_Handler> ;
-}
-void _stop_init() 
-{label_c4:  ;
-MOVS_2(R1, 128);//  c4:	2180      	movs	r1, #128	 ; 0x80 ;
+label_c4:  ;
+//Could not parse:   c4:	46c0      	nop			 ; (mov r8, r8) ;
 label_c6:  ;
-R2 = 0x40047000 ;//  c6:	4a10      	ldr	r2, [pc, #64]	 ; (108 <_stop_init+0x44>) ;
-label_c8:  ;
-R3 = 0x00001038 ;//  c8:	4b10      	ldr	r3, [pc, #64]	 ; (10c <_stop_init+0x48>) ;
-label_ca:  ;
-LSLS_3(R1, R1, 6);//  ca:	0189      	lsls	r1, r1, #6 ;
-label_cc:  ;
-LDR_3(R0, R2, R3 );//  cc:	58d0      	ldr	r0, [r2, r3] ;
-label_ce:  ;
-PUSH(SP,0b0000110001);//  ce:	b530      	push	r4, r5, lr ;
-label_d0:  ;
-ORRS_2(R1, R0 );//  d0:	4301      	orrs	r1, r0 ;
-label_d2:  ;
-STR_3(R1, R2, R3 );//  d2:	50d1      	str	r1, [r2, r3] ;
-label_d4:  ;
-R1 = 0x4004d000 ;//  d4:	490e      	ldr	r1, [pc, #56]	 ; (110 <_stop_init+0x4c>) ;
-label_d6:  ;
-R4 = 0xfffff8ff ;//  d6:	4c0f      	ldr	r4, [pc, #60]	 ; (114 <_stop_init+0x50>) ;
-label_d8:  ;
-LDR_3(R0, R1, 4);//  d8:	6848      	ldr	r0, [r1, #4] ;
-label_da:  ;
-ANDS_2(R0, R4 );//  da:	4020      	ands	r0, r4 ;
-label_dc:  ;
-STR_3(R0, R1, 4);//  dc:	6048      	str	r0, [r1, #4] ;
-label_de:  ;
-MOVS_2(R0, 128);//  de:	2080      	movs	r0, #128	 ; 0x80 ;
-label_e0:  ;
-LDR_3(R4, R1, 4);//  e0:	684c      	ldr	r4, [r1, #4] ;
-label_e2:  ;
-LSLS_3(R0, R0, 1);//  e2:	0040      	lsls	r0, r0, #1 ;
-label_e4:  ;
-ORRS_2(R0, R4 );//  e4:	4320      	orrs	r0, r4 ;
-label_e6:  ;
-STR_3(R0, R1, 4);//  e6:	6048      	str	r0, [r1, #4] ;
-label_e8:  ;
-MOVS_2(R0, 2);//  e8:	2002      	movs	r0, #2 ;
-label_ea:  ;
-R4 = 0x400ff100 ;//  ea:	4c0b      	ldr	r4, [pc, #44]	 ; (118 <_stop_init+0x54>) ;
-label_ec:  ;
-LDR_3(R5, R4, 20);//  ec:	6965      	ldr	r5, [r4, #20] ;
-label_ee:  ;
-BICS_2(R5, R0 );//  ee:	4385      	bics	r5, r0 ;
-label_f0:  ;
-STR_3(R5, R4, 20);//  f0:	6165      	str	r5, [r4, #20] ;
-label_f2:  ;
-LDR_3(R5, R1, 4);//  f2:	684d      	ldr	r5, [r1, #4] ;
-label_f4:  ;
-ORRS_2(R5, R0 );//  f4:	4305      	orrs	r5, r0 ;
-label_f6:  ;
-STR_3(R5, R1, 4);//  f6:	604d      	str	r5, [r1, #4] ;
-label_f8:  ;
-LDR_3(R1, R4, 16);//  f8:	6921      	ldr	r1, [r4, #16] ;
-label_fa:  ;
-TST_2(R1, R0 );//  fa:	4201      	tst	r1, r0 ;
-label_fc:  ;
-g_cycle_count++;
- if (Z_flag == 1) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_f8 ; } ;//  fc:	d0fc      	beqn	f8 <_stop_init+0x34> ;
-label_fe:  ;
-LDR_3(R1, R2, R3 );//  fe:	58d1      	ldr	r1, [r2, r3] ;
-label_100:  ;
-R0 = 0xffffdfff ;// 100:	4806      	ldr	r0, [pc, #24]	 ; (11c <_stop_init+0x58>) ;
-label_102:  ;
-ANDS_2(R1, R0 );// 102:	4001      	ands	r1, r0 ;
-label_104:  ;
-STR_3(R1, R2, R3 );// 104:	50d1      	str	r1, [r2, r3] ;
-label_106:  ;
-POP(SP,0b0000110001);
-return ;// 106:	bd30      	pop	r4, r5, pc ;
-label_108:  ;
-//Could not parse:  108:	40047000 	word	0x40047000 ;
-label_10c:  ;
-//Could not parse:  10c:	00001038 	word	0x00001038 ;
-label_110:  ;
-//Could not parse:  110:	4004d000 	word	0x4004d000 ;
-label_114:  ;
-//Could not parse:  114:	fffff8ff 	word	0xfffff8ff ;
-label_118:  ;
-//Could not parse:  118:	400ff100 	word	0x400ff100 ;
-label_11c:  ;
-//Could not parse:  11c:	ffffdfff 	word	0xffffdfff ;
+//Could not parse:   c6:	46c0      	nop			 ; (mov r8, r8) ;
 }
 void _reset_init() 
-{label_120:  ;
-g_cycle_count += 3;
-_stop_init( );// 120:	f7ff ffd0 	bl	c4 <_stop_init> ;
-label_124:  ;
-MOVS_2(R2, 136);// 124:	2288      	movs	r2, #136	 ; 0x88 ;
-label_126:  ;
-MOVS_2(R1, 1);// 126:	2101      	movs	r1, #1 ;
-label_128:  ;
-R3 = 0x40047000 ;// 128:	4b2e      	ldr	r3, [pc, #184]	 ; (1e4 <_reset_init+0xc4>) ;
-label_12a:  ;
-LSLS_3(R2, R2, 5);// 12a:	0152      	lsls	r2, r2, #5 ;
-label_12c:  ;
-STR_3(R1, R3, R2 );// 12c:	5099      	str	r1, [r3, r2] ;
-label_12e:  ;
-R0 = 0x00000000 ;// 12e:	482e      	ldr	r0, [pc, #184]	 ; (1e8 <_reset_init+0xc8>) ;
-label_130:  ;
-R2 = 0xe000ed00 ;// 130:	4a2e      	ldr	r2, [pc, #184]	 ; (1ec <_reset_init+0xcc>) ;
-label_132:  ;
-STR_3(R0, R2, 8);// 132:	6090      	str	r0, [r2, #8] ;
-label_134:  ;
-MOVS_2(R2, 128);// 134:	2280      	movs	r2, #128	 ; 0x80 ;
-label_136:  ;
-R0 = 0x00001038 ;// 136:	482e      	ldr	r0, [pc, #184]	 ; (1f0 <_reset_init+0xd0>) ;
-label_138:  ;
-LSLS_3(R2, R2, 2);// 138:	0092      	lsls	r2, r2, #2 ;
-label_13a:  ;
-LDR_3(R4, R3, R0 );// 13a:	581c      	ldr	r4, [r3, r0] ;
-label_13c:  ;
-ORRS_2(R2, R4 );// 13c:	4322      	orrs	r2, r4 ;
-label_13e:  ;
-STR_3(R2, R3, R0 );// 13e:	501a      	str	r2, [r3, r0] ;
-label_140:  ;
-R0 = 0x10010000 ;// 140:	482c      	ldr	r0, [pc, #176]	 ; (1f4 <_reset_init+0xd4>) ;
-label_142:  ;
-R2 = 0x00001044 ;// 142:	4a2d      	ldr	r2, [pc, #180]	 ; (1f8 <_reset_init+0xd8>) ;
-label_144:  ;
-STR_3(R0, R3, R2 );// 144:	5098      	str	r0, [r3, r2] ;
-label_146:  ;
-LDR_3(R2, R3, 0);// 146:	681a      	ldr	r2, [r3, #0] ;
-label_148:  ;
-R0 = 0xfff3ffff ;// 148:	482c      	ldr	r0, [pc, #176]	 ; (1fc <_reset_init+0xdc>) ;
-label_14a:  ;
-ANDS_2(R2, R0 );// 14a:	4002      	ands	r2, r0 ;
-label_14c:  ;
-MOVS_2(R0, 128);// 14c:	2080      	movs	r0, #128	 ; 0x80 ;
-label_14e:  ;
-STR_3(R2, R3, 0);// 14e:	601a      	str	r2, [r3, #0] ;
-label_150:  ;
-R2 = 0x00001004 ;// 150:	4a2b      	ldr	r2, [pc, #172]	 ; (200 <_reset_init+0xe0>) ;
-label_152:  ;
-LSLS_3(R0, R0, 9);// 152:	0240      	lsls	r0, r0, #9 ;
-label_154:  ;
-LDR_3(R4, R3, R2 );// 154:	589c      	ldr	r4, [r3, r2] ;
-label_156:  ;
-ORRS_2(R0, R4 );// 156:	4320      	orrs	r0, r4 ;
-label_158:  ;
-STR_3(R0, R3, R2 );// 158:	5098      	str	r0, [r3, r2] ;
-label_15a:  ;
-LDR_3(R0, R3, R2 );// 15a:	5898      	ldr	r0, [r3, r2] ;
-label_15c:  ;
-R4 = 0xfcffffff ;// 15c:	4c29      	ldr	r4, [pc, #164]	 ; (204 <_reset_init+0xe4>) ;
-label_15e:  ;
-ANDS_2(R4, R0 );// 15e:	4004      	ands	r4, r0 ;
-label_160:  ;
-MOVS_2(R0, 128);// 160:	2080      	movs	r0, #128	 ; 0x80 ;
-label_162:  ;
-LSLS_3(R0, R0, 17);// 162:	0440      	lsls	r0, r0, #17 ;
-label_164:  ;
-ORRS_2(R0, R4 );// 164:	4320      	orrs	r0, r4 ;
-label_166:  ;
-STR_3(R0, R3, R2 );// 166:	5098      	str	r0, [r3, r2] ;
-label_168:  ;
-R3 = 0x40049000 ;// 168:	4b27      	ldr	r3, [pc, #156]	 ; (208 <_reset_init+0xe8>) ;
-label_16a:  ;
-R4 = 0xfefff8ff ;// 16a:	4c28      	ldr	r4, [pc, #160]	 ; (20c <_reset_init+0xec>) ;
-label_16c:  ;
-LDR_3(R0, R3, 72);// 16c:	6c98      	ldr	r0, [r3, #72]	 ; 0x48 ;
-label_16e:  ;
-ANDS_2(R0, R4 );// 16e:	4020      	ands	r0, r4 ;
-label_170:  ;
-STR_3(R0, R3, 72);// 170:	6498      	str	r0, [r3, #72]	 ; 0x48 ;
-label_172:  ;
-LDR_3(R2, R3, 76);// 172:	6cda      	ldr	r2, [r3, #76]	 ; 0x4c ;
-label_174:  ;
-MOVS_2(R0, 0);// 174:	2000      	movs	r0, #0 ;
-label_176:  ;
-ANDS_2(R2, R4 );// 176:	4022      	ands	r2, r4 ;
-label_178:  ;
-STR_3(R2, R3, 76);// 178:	64da      	str	r2, [r3, #76]	 ; 0x4c ;
-label_17a:  ;
-MOVS_2(R2, 36);// 17a:	2224      	movs	r2, #36	 ; 0x24 ;
-label_17c:  ;
-MOVS_2(R4, 31);// 17c:	241f      	movs	r4, #31 ;
-label_17e:  ;
-R3 = 0x40065000 ;// 17e:	4b24      	ldr	r3, [pc, #144]	 ; (210 <_reset_init+0xf0>) ;
-label_180:  ;
-STRB_3(R0, R3, 0);// 180:	7018      	strb	r0, [r3, #0] ;
-label_182:  ;
-R3 = 0x40064000 ;// 182:	4b24      	ldr	r3, [pc, #144]	 ; (214 <_reset_init+0xf4>) ;
-label_184:  ;
-STRB_3(R2, R3, 1);// 184:	705a      	strb	r2, [r3, #1] ;
-label_186:  ;
-ADDS_2(R2, 116);// 186:	3274      	adds	r2, #116	 ; 0x74 ;
-label_188:  ;
-STRB_3(R2, R3, 0);// 188:	701a      	strb	r2, [r3, #0] ;
-label_18a:  ;
-LDRB_3(R2, R3, 3);// 18a:	78da      	ldrb	r2, [r3, #3] ;
-label_18c:  ;
-ANDS_2(R2, R4 );// 18c:	4022      	ands	r2, r4 ;
-label_18e:  ;
-STRB_3(R2, R3, 3);// 18e:	70da      	strb	r2, [r3, #3] ;
-label_190:  ;
-MOVS_2(R2, 16);// 190:	2210      	movs	r2, #16 ;
-label_192:  ;
-STRB_3(R1, R3, 4);// 192:	7119      	strb	r1, [r3, #4] ;
-label_194:  ;
-STRB_3(R0, R3, 5);// 194:	7158      	strb	r0, [r3, #5] ;
-label_196:  ;
-LDRB_3(R1, R3, 6);// 196:	7999      	ldrb	r1, [r3, #6] ;
-label_198:  ;
-TST_2(R1, R2 );// 198:	4211      	tst	r1, r2 ;
-label_19a:  ;
-g_cycle_count++;
- if (Z_flag == 0) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_196 ; } ;// 19a:	d1fc      	bnen	196 <_reset_init+0x76> ;
-label_19c:  ;
-MOVS_2(R1, 12);// 19c:	210c      	movs	r1, #12 ;
-label_19e:  ;
-LDRB_3(R2, R3, 6);// 19e:	799a      	ldrb	r2, [r3, #6] ;
-label_1a0:  ;
-ANDS_2(R2, R1 );// 1a0:	400a      	ands	r2, r1 ;
-label_1a2:  ;
-CMP_2(R2, 8);// 1a2:	2a08      	cmp	r2, #8 ;
-label_1a4:  ;
-g_cycle_count++;
- if (Z_flag == 0) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_19e ; } ;// 1a4:	d1fb      	bnen	19e <_reset_init+0x7e> ;
-label_1a6:  ;
-ADDS_2(R2, 56);// 1a6:	3238      	adds	r2, #56	 ; 0x38 ;
-label_1a8:  ;
-STRB_3(R2, R3, 5);// 1a8:	715a      	strb	r2, [r3, #5] ;
-label_1aa:  ;
-LDRB_3(R1, R3, 6);// 1aa:	7999      	ldrb	r1, [r3, #6] ;
-label_1ac:  ;
-TST_2(R1, R2 );// 1ac:	4211      	tst	r1, r2 ;
-label_1ae:  ;
-g_cycle_count++;
- if (Z_flag == 1) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_1aa ; } ;// 1ae:	d0fc      	beqn	1aa <_reset_init+0x8a> ;
-label_1b0:  ;
-MOVS_2(R2, 24);// 1b0:	2218      	movs	r2, #24 ;
-label_1b2:  ;
-MOVS_2(R1, 12);// 1b2:	210c      	movs	r1, #12 ;
-label_1b4:  ;
-STRB_3(R2, R3, 0);// 1b4:	701a      	strb	r2, [r3, #0] ;
-label_1b6:  ;
-LDRB_3(R2, R3, 6);// 1b6:	799a      	ldrb	r2, [r3, #6] ;
-label_1b8:  ;
-ANDS_2(R2, R1 );// 1b8:	400a      	ands	r2, r1 ;
-label_1ba:  ;
-CMP_2(R2, 12);// 1ba:	2a0c      	cmp	r2, #12 ;
-label_1bc:  ;
-g_cycle_count++;
- if (Z_flag == 0) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_1b6 ; } ;// 1bc:	d1fb      	bnen	1b6 <_reset_init+0x96> ;
-label_1be:  ;
-MOVS_2(R2, 0);// 1be:	2200      	movs	r2, #0 ;
-label_1c0:  ;
-R0 = 0x1ffff000 ;// 1c0:	4815      	ldr	r0, [pc, #84]	 ; (218 <_reset_init+0xf8>) ;
-label_1c2:  ;
-R1 = 0x1ffff000 ;// 1c2:	4916      	ldr	r1, [pc, #88]	 ; (21c <_reset_init+0xfc>) ;
-label_1c4:  ;
-R4 = 0x000005ce ;// 1c4:	4c16      	ldr	r4, [pc, #88]	 ; (220 <_reset_init+0x100>) ;
-label_1c6:  ;
-ADDS_3(R3, R2, R0 );// 1c6:	1813      	adds	r3, r2, r0 ;
-label_1c8:  ;
-CMP_2(R3, R1 );// 1c8:	428b      	cmp	r3, r1 ;
-label_1ca:  ;
+{label_c8:  ;
+R2 = 0x00000000 ;//  c8:	4a0a      	ldr	r2, [pc, #40]	 ; (f4 <_reset_init+0x2c>) ;
+label_ca:  ;
+R3 = 0xe000ed00 ;//  ca:	4b0b      	ldr	r3, [pc, #44]	 ; (f8 <_reset_init+0x30>) ;
+label_cc:  ;
+R0 = 0x1ffff000 ;//  cc:	480b      	ldr	r0, [pc, #44]	 ; (fc <_reset_init+0x34>) ;
+label_ce:  ;
+STR_3(R2, R3, 8);//  ce:	609a      	str	r2, [r3, #8] ;
+label_d0:  ;
+MOVS_2(R2, 0);//  d0:	2200      	movs	r2, #0 ;
+label_d2:  ;
+R1 = 0x1ffff000 ;//  d2:	490b      	ldr	r1, [pc, #44]	 ; (100 <_reset_init+0x38>) ;
+label_d4:  ;
+R4 = 0x000005ce ;//  d4:	4c0b      	ldr	r4, [pc, #44]	 ; (104 <_reset_init+0x3c>) ;
+label_d6:  ;
+ADDS_3(R3, R2, R0 );//  d6:	1813      	adds	r3, r2, r0 ;
+label_d8:  ;
+CMP_2(R3, R1 );//  d8:	428b      	cmp	r3, r1 ;
+label_da:  ;
 g_cycle_count++;
  if (C_flag == 0) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_1d8 ; } ;// 1ca:	d305      	bccn	1d8 <_reset_init+0xb8> ;
-label_1cc:  ;
-MOVS_2(R1, 0);// 1cc:	2100      	movs	r1, #0 ;
-label_1ce:  ;
-R2 = 0x1ffff000 ;// 1ce:	4a15      	ldr	r2, [pc, #84]	 ; (224 <_reset_init+0x104>) ;
-label_1d0:  ;
-CMP_2(R3, R2 );// 1d0:	4293      	cmp	r3, r2 ;
-label_1d2:  ;
+ goto label_e8 ; } ;//  da:	d305      	bccn	e8 <_reset_init+0x20> ;
+label_dc:  ;
+MOVS_2(R1, 0);//  dc:	2100      	movs	r1, #0 ;
+label_de:  ;
+R2 = 0x1ffff000 ;//  de:	4a0a      	ldr	r2, [pc, #40]	 ; (108 <_reset_init+0x40>) ;
+label_e0:  ;
+CMP_2(R3, R2 );//  e0:	4293      	cmp	r3, r2 ;
+label_e2:  ;
 g_cycle_count++;
  if (C_flag == 0 && Z_flag == 1) {g_cycle_count+=2; //thumb 'narrow' version
- goto label_1e0 ; } ;// 1d2:	d905      	blsn	1e0 <_reset_init+0xc0> ;
-label_1d4:  ;
+ goto label_f0 ; } ;//  e2:	d905      	blsn	f0 <_reset_init+0x28> ;
+label_e4:  ;
 g_cycle_count += 3;
-main_thread( );// 1d4:	f000 f92a 	bl	42c <main_thread> ;
-label_1d8:  ;
-LDR_3(R5, R4, R2 );// 1d8:	58a5      	ldr	r5, [r4, r2] ;
-label_1da:  ;
-ADDS_2(R2, 4);// 1da:	3204      	adds	r2, #4 ;
-label_1dc:  ;
-STR_3(R5, R3, 0);// 1dc:	601d      	str	r5, [r3, #0] ;
-label_1de:  ;
+main_thread( );//  e4:	f000 f9a2 	bl	42c <main_thread> ;
+label_e8:  ;
+LDR_3(R5, R4, R2 );//  e8:	58a5      	ldr	r5, [r4, r2] ;
+label_ea:  ;
+ADDS_2(R2, 4);//  ea:	3204      	adds	r2, #4 ;
+label_ec:  ;
+STR_3(R5, R3, 0);//  ec:	601d      	str	r5, [r3, #0] ;
+label_ee:  ;
 g_cycle_count++;
  {g_cycle_count+=2; //thumb 'narrow' version
- goto label_1c6 ; } ;// 1de:	e7f2      	bn	1c6 <_reset_init+0xa6> ;
-label_1e0:  ;
-STMIA(R3,0b000111111);// 1e0:	c302      	stmia	r3!, r1 ;
-label_1e2:  ;
+ goto label_d6 ; } ;//  ee:	e7f2      	bn	d6 <_reset_init+0xe> ;
+label_f0:  ;
+STMIA(R3,0b000111111);//  f0:	c302      	stmia	r3!, r1 ;
+label_f2:  ;
 g_cycle_count++;
  {g_cycle_count+=2; //thumb 'narrow' version
- goto label_1d0 ; } ;// 1e2:	e7f5      	bn	1d0 <_reset_init+0xb0> ;
-label_1e4:  ;
-//Could not parse:  1e4:	40047000 	word	0x40047000 ;
-label_1e8:  ;
-//Could not parse:  1e8:	00000000 	word	0x00000000 ;
-label_1ec:  ;
-//Could not parse:  1ec:	e000ed00 	word	0xe000ed00 ;
-label_1f0:  ;
-//Could not parse:  1f0:	00001038 	word	0x00001038 ;
-label_1f4:  ;
-//Could not parse:  1f4:	10010000 	word	0x10010000 ;
-label_1f8:  ;
-//Could not parse:  1f8:	00001044 	word	0x00001044 ;
-label_1fc:  ;
-//Could not parse:  1fc:	fff3ffff 	word	0xfff3ffff ;
-label_200:  ;
-//Could not parse:  200:	00001004 	word	0x00001004 ;
-label_204:  ;
-//Could not parse:  204:	fcffffff 	word	0xfcffffff ;
-label_208:  ;
-//Could not parse:  208:	40049000 	word	0x40049000 ;
-label_20c:  ;
-//Could not parse:  20c:	fefff8ff 	word	0xfefff8ff ;
-label_210:  ;
-//Could not parse:  210:	40065000 	word	0x40065000 ;
-label_214:  ;
-//Could not parse:  214:	40064000 	word	0x40064000 ;
-label_218:  ;
-//Could not parse:  218:	1ffff000 	word	0x1ffff000 ;
-label_21c:  ;
-//Could not parse:  21c:	1ffff000 	word	0x1ffff000 ;
-label_220:  ;
-//Could not parse:  220:	000005ce 	word	0x000005ce ;
-label_224:  ;
-//Could not parse:  224:	1ffff000 	word	0x1ffff000 ;
+ goto label_e0 ; } ;//  f2:	e7f5      	bn	e0 <_reset_init+0x18> ;
+label_f4:  ;
+//Could not parse:   f4:	00000000 	word	0x00000000 ;
+label_f8:  ;
+//Could not parse:   f8:	e000ed00 	word	0xe000ed00 ;
+label_fc:  ;
+//Could not parse:   fc:	1ffff000 	word	0x1ffff000 ;
+label_100:  ;
+//Could not parse:  100:	1ffff000 	word	0x1ffff000 ;
+label_104:  ;
+//Could not parse:  104:	000005ce 	word	0x000005ce ;
+label_108:  ;
+//Could not parse:  108:	1ffff000 	word	0x1ffff000 ;
 }
 void __startup_end() 
 {}
