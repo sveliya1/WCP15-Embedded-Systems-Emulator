@@ -240,6 +240,7 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.write("}\n")
 		interprettedFile.write(head)
 		threads = GetThreads()
+		threads = threads + "std::thread last_hope(set_init_clock);\n"
 		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\nburn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\nSP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n" + threads+ "_reset_init();\n")
 
 		#interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, LR, pc, result;\n")

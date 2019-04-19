@@ -36,6 +36,8 @@ uint32_t read_register(uint32_t address, uint32_t bit_value);
 void clear_register(uint32_t address, uint32_t value);
 void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
+void set_init_clock();
+void SLEEP(double seconds);
 
 auto start = std::chrono::high_resolution_clock::now();
 auto finish= std::chrono::high_resolution_clock::now();
@@ -92,3 +94,26 @@ void supervisor() {
 
 }
 
+void SLEEP(double seconds){
+	auto sleep_start = std::chrono::high_resolution_clock::now();
+	auto sleep_finish = std::chrono::high_resolution_clock::now();
+	double time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+	while (time_slept < seconds) {
+		sleep_finish = std::chrono::high_resolution_clock::now();
+		time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+}
+
+}
+//The init_clocks function in _startup.c
+//has 4 while loops, it waits specifically for these sequence of numbers
+//without these stores, the program will enter an infinite loop.
+void set_init_clock(){
+	STRB_2(0,0x40064006);
+	SLEEP(.2);
+	STRB_2(8,0x40064006);
+	SLEEP(.2);
+	// This number is the 32-bit inversion of the number 64
+	STRB_2(4294967263,0x40064006);
+	SLEEP(1);
+	STRB_2(0xC,0x40064006);
+}
