@@ -137,6 +137,32 @@ g_cycle_count += 1;\
 	Rd = result;\
 	g_cycle_count += 1;\
 }
+#define io_write(address,value){\
+switch (address)\
+{\
+case 0x400FF044:\
+set_register(0x400FF040, value);\
+break;\
+case 0x400FF048:\
+clear_register(0x400FF040, value);\
+break;\
+case 0x400FF04C:\
+toggle_register(0x400FF040, value);\
+break;\
+case 0x400FF0C4:\
+set_register(0x400FF0C0, value);\
+break;\
+case 0x400FF0C8:\
+clear_register(0x400FF0C0, value);\
+break;\
+case 0x400FF0CC:\
+toggle_register(0x400FF0C0, value);\
+break;\
+default:\
+map->write_word(address, (uint32_t)value);\
+break;\
+}\
+}
 #define LDMIA(base_reg, reg_vector){\
 if (reg_vector & (1 << 7)) {\
 		LDR_2(R0, base_reg);\
@@ -173,38 +199,38 @@ if (reg_vector & (1 << 0)) {\
 }
 #define LDR_2(reg,address){\
 reg = map -> read(address, Size::WORD);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LDRB_2(reg,address){\
 reg = map -> read(address, Size::BYTE);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LDRH_2(reg,address){\
 reg = map -> read(address, Size::HALF_WORD);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LDR_3(reg,rg_addr, offset){\
-reg = map -> read((unsigned)(rg_addr+offset), Size::WORD);\
+reg = map -> read((uint32_t)(rg_addr+offset), Size::WORD);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
-#define LDRB_3(reg,rg_addr, offset){\
-reg = map -> read((unsigned)(rg_addr+offset), Size::WORD);\
+#define LDRB_3(reg,rg_addr,offset){\
+reg = map -> read((unsigned)(rg_addr+offset), Size::BYTE);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LDRH_3(reg,address){\
 reg = map -> read((rg_addr+offset), Size::HALF_WORD);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define LSRS_2(Rd,Rn){\
@@ -267,7 +293,7 @@ Rd = result;\
 g_cycle_count += 1;\
 }
 #define MVN_2(Rd, Rn) Rd = ~Rn; g_cycle_count += 1;
-#define ORR_2(Rd, Rn) Rd = Rd | Rn; g_cycle_count += 1;
+#define ORR_2(Rd, Rn) Rd = Rd |Rn; g_cycle_count += 1;
 #define ORR_3(Rd,Rn,Rm) Rd = Rn | Rm; g_cycle_count += 1;
 #define ORRS_2(Rd, Rn){\
 	result = Rd | Rn;\
@@ -451,38 +477,38 @@ g_cycle_count += 1;\
 }
 #define STR_2(value, address){\
  io_write(address,value);\
+if (g_cycle_count > supervisor_threshold)\
  supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRB_2(value, address){\
  map -> write(address, (unsigned) value, Size::BYTE);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRH_2(value, address){\
  map -> write(address, (unsigned) value, Size::HALF_WORD);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STR_3(value, reg, offset){\
  io_write((reg+offset),value);\
+if (g_cycle_count > supervisor_threshold)\
  supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRB_3(value, reg, offset){\
  map -> write((unsigned)(reg+offset), value, Size::BYTE);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STRH_3(value, reg, offset){\
  map -> write((unsigned)(reg+offset), value, Size::HALF_WORD);\
+if (g_cycle_count > supervisor_threshold)\
 supervisor();\
-get_io_mutex();\
 g_cycle_count += 2;\
 }
 #define STMIA(base_reg, reg_vector) {\

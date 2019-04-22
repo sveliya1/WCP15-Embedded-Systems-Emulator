@@ -1,16 +1,10 @@
 [
-  {
-    "Header_file": "switch.h",
-    "Thread Function": "std::thread button(check_button)",
-    "Thread Name": "button",
-    "ISR": "None"
+    {
+      "Header_file": "rgbled.h",
+      "Thread Function": "std::thread led(led_read_state,map)",
+      "Thread Name": "led",
+      "ISR": "None"
 
-  },
-  {
-    "Header_file": "switch_INT.h",
-    "Thread Function": "std::thread button(check_button_INT)",
-    "Thread Name": "button",
-    "ISR": "if (BUTTON) { PORTA_IRQHandler(); }"
-  }
-
+    }
 ]
+

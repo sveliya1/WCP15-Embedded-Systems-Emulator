@@ -66,7 +66,7 @@ with open("timing_demo.txt", 'r+') as assemblyFile:
 	for line in assemblyFile:
 		if nextLine:
 			lineSplit = line.split()
-			lineNumber = lineSplit[8] + lineSplit[7] + lineSplit[6] + str(int(lineSplit[5])-1) #TODO grab the right stuff
+			lineNumber = lineSplit[8] + lineSplit[7] + lineSplit[6] + str(hex(int(lineSplit[5], 16)-1)) #TODO grab the right stuff
 			break
 		elif "InterruptVector" in line:
 			nextLine = True 
@@ -231,7 +231,7 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		content = interprettedFile.read()
 		interprettedFile.seek(0)
 		
-		interprettedFile.write("#include <stdio.h>\n#include <math.h>\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include \"memorymap.h\"\n#include \"macros.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#include <chrono>\n")
+		interprettedFile.write("#include <stdio.h>\n#include <math.h>\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include \"memorymap.h\"\n#include \"flash.h\"\n#include \"macros.h\"\n#include \"IO_Register.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#include <chrono>\n")
 		interprettedFile.write(GetIncludes())
 		interprettedFile.write(functionDec)
 		interprettedFile.write("void ISR();")
@@ -239,9 +239,9 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.write(GetISR())
 		interprettedFile.write("}\n")
 		interprettedFile.write(head)
-		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\n//burn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\n//SP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n_reset_init();\n")
-		interprettedFile.write(GetThreads())
-
+		threads = GetThreads()
+		threads = threads + "std::thread last_hope(set_init_clock);\n"
+		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\nburn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\nSP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n" + threads+ "_reset_init();\n")
 
 		#interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, LR, pc, result;\n")
 		#interprettedFile.write("bool V_flag =  false;\n")

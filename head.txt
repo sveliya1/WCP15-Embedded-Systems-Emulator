@@ -1,40 +1,25 @@
 
 
+//All addresses are 0 addressable, add 1 to all of their sizes
 #define FLASH_START 0x00000000
-#define FLASH_SIZE 0x07FFFFFF
-#define RAM_START 0x1FFFF000-1
-#define RAM_SIZE 0x20002FFF-RAM_START
+#define FLASH_SIZE 0x07FFFFFF+1
+#define RAM_START 0x1FFFF000
+#define RAM_SIZE 0x20002FFF+1-RAM_START
 #define AIPS_START 0x40000000
-#define AIPS_SIZE 0x4007FFFF-AIPS_START
-
+#define AIPS_SIZE 0x4007FFFF+1-AIPS_START
 
 #define GPIO_START 0x400FF000 
-#define GPIO_SIZE 0x400FFFFF-GPIO_START
+#define GPIO_SIZE 0x400FFFFF+1-GPIO_START
 
 #define PRIVATE_PERI_START 0xE0000000
-#define PRIVATE_SIZE 0xE00FFFFF - PRIVATE_PERI_START
+#define PRIVATE_SIZE 0xE00FFFFF+1 - PRIVATE_PERI_START
 
-enum instructions {
-	ADDS, SUBS, ANDS, EORS, ORRS, BICS, ORNS, ADCS, RSBS, SBCS, CMP, CMN, MULS, TST, LSLS, LSRS, ASRS,
-	RORS, MOVS, MVN
-};
+uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result = 0;
 
-uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result;
+uint64_t g_embedded_sys_freq = 48000000;
+uint64_t supervisor_threshold =  0.5*g_embedded_sys_freq;
+uint64_t supervisor_increment = supervisor_threshold;
 
-uint64_t g_embedded_sys_freq = 1000000000;
-uint64_t supervisor_threshold = 0.1*g_embedded_sys_freq;
-uint64_t suspervisor_increment = suspervisor_threshold;
-std::mutex io_lock;
-std::condition_variable io_cond;
-std::condition_variable main_thread_io;
-int show_io = 0;
-
-void io_write(uint32_t address, uint32_t value);
-/*
-void clear_register(uint32_t address, uint32_t value);
-void set_register(uint32_t address, uint32_t value);
-void toggle_register(uint32_t address, uint32_t value);
-*/
 uint8_t lsb_byte;
 uint64_t g_cycle_count;
 uint32_t lsb_word;
@@ -44,103 +29,18 @@ RAMDevice* gpio = new RAMDevice(GPIO_START, GPIO_SIZE, ENDIAN_LITTLE);
 RAMDevice* aips = new RAMDevice(AIPS_START, AIPS_SIZE, ENDIAN_LITTLE);
 RAMDevice* ram = new RAMDevice(RAM_START, RAM_SIZE, ENDIAN_LITTLE);
 RAMDevice* private_peri = new RAMDevice(PRIVATE_PERI_START, PRIVATE_SIZE, ENDIAN_LITTLE);
-
 ROMDevice* flash = new ROMDevice(FLASH_START, FLASH_SIZE, ENDIAN_LITTLE);
 
-void set_rgbled_color_to();
 void supervisor();
-void led_read_state();
-void get_io_mutex();
 uint32_t read_register(uint32_t address, uint32_t bit_value);
-double get_cpu_time();
 void clear_register(uint32_t address, uint32_t value);
 void set_register(uint32_t address, uint32_t value);
 void toggle_register(uint32_t address, uint32_t value);
+void set_init_clock();
+void SLEEP(double seconds);
 
 auto start = std::chrono::high_resolution_clock::now();
 auto finish= std::chrono::high_resolution_clock::now();
-
-/*void io_write(uint32_t address, uint32_t value)
-{
-	switch (address)
-	{
-		//Used for configuring LED
-		//----------------------------
-		//SIM_SCGC5
-	case 0x40048038:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Pin Control Register (PORTB_PCR18) p.179
-	case 0x4004A048:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Pin Control Register (PORTB_PCR19)
-	case 0x4004A04C:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Pin Control Register (PORTD_PCR1)
-	case 0x4004C004:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Port Data Direction Register (GPIOB_PDDR)
-	case 0x400FF054:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Port Data Direction Register (GPIOD_PDDR)
-	case 0x400FF0D4:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//----------------------------------
-
-		//Used for configuring switch:
-		//----------------------------------
-		//SIM SCGC5 already gets used by LED 
-
-		//Pin Control Register (PORTA_PCR20)
-	case 0x40049050:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//Port Data Direction Register(GPIOA_PDDR)
-	case 0x400FF014:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-		//-----------------------------------
-
-		//PSOR, PCOR, PTOR registers for LEDs
-		//Green and Red
-	case 0x400FF044: //GPIOB_PSOR 
-		set_register(0x400FF040, value);
-		break;
-	case 0x400FF048: //GPIOB_PCOR
-		clear_register(0x400FF040, value);
-		break;
-	case 0x400FF04C: //GPIOB_PTOR on pg.774
-		toggle_register(0x400FF040, value);
-		break;
-		//Blue LED
-	case 0x400FF0C4: //GPIOD_PSOR
-		set_register(0x400FF0C0, value);
-		break;
-	case 0x400FF0C8:
-		clear_register(0x400FF0C0, value);
-		break;
-	case 0x400FF0CC:
-		toggle_register(0x400FF0C0, value);
-		break;
-
-		//------------------------------
-		//Switch Input Register for Switch
-	case 0x400FF010: //This address needs to be read
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-	default:
-		map -> write(address, (uint32_t) value, Size::WORD);
-		break;
-
-
-	}
-
-}*/
 
 void clear_register(uint32_t address, uint32_t value)
 {
@@ -171,92 +71,49 @@ uint32_t read_register(uint32_t address, uint32_t bit_value)
 	return register_value;
 }
 
-void get_io_mutex() {
-
-	//std::cout << "Show IO: " << show_io << std::endl;
-	std::unique_lock<std::mutex> locker(io_lock);
-	main_thread_io.wait(locker, []() { return !show_io; });
-	//std::cout << "Show IO: " << show_io << std::endl;
-	show_io = 1;
-	io_cond.notify_one();
-	locker.unlock();
-
-}
-
-void led_read_state()
-{
-
-	while (1) {
-		std::unique_lock<std::mutex> locker(io_lock);
-		io_cond.wait(locker, []() { return show_io; }); //Still can have spurious wakeups
-		//Read the LED values
-		//std::cout << "Show IO: " << show_io << std::endl;
-		uint32_t redled_value = read_register(0x400FF040, 18) << 2; //11 /
-		uint32_t greenled_value = read_register(0x400FF040, 19) << 1; //12
-		uint32_t blueled_value = read_register(0x400FF0c0, 1); //8
-		//std::cout << redled_value << "\n" << greenled_value << "\n" << blueled_value << "\n";
-		uint32_t result = redled_value + greenled_value + blueled_value;
-		switch (result)
-		{
-		case 0:
-			std::cout << "LED is WHITE\n";
-			break;
-		case 1: //001
-			std::cout << "LED is YELLOW\n";
-			break;
-		case 2:
-			std::cout << "LED is MAGENTA\n";
-			break;
-		case 3:
-			std::cout << "LED is RED\n";
-			break;
-		case 4:
-			std::cout << "LED is CYAN\n";
-			break;
-
-		case 5:
-			std::cout << "LED is GREEN\n";
-			break;
-
-		case 6:
-			std::cout << "LED is BLUE\n";
-			break;
-		case 7:
-			std::cout << "LED is BLACK\n";
-			break;
-		default:
-			std::cout << "Switch statement is broken...\n";
-			break;
-		}
-		show_io = 0;
-		locker.unlock();
-		main_thread_io.notify_one();
-	}
-}
-
 void supervisor() {
 
-	if (g_cycle_count < supervisor_threshold)
-		return;
-
-	static double previous_CPU_time = 0;
-	long double embedded_sys_CPU_time = (long double)g_cycle_count / g_embedded_sys_freq; // seconds
-	//double wall_clock_time = get_wall_time();
-	//std::cout << "Wall Clock Time: " << wall_clock_time << std::endl;
-	double host_CPU_time = get_cpu_time();
-	double CPU_time_bt_call = host_CPU_time - previous_CPU_time;
-	double sleep_time = embedded_sys_CPU_time - CPU_time_bt_call;
+	static uint64_t previous_g_cycle_count = 0;
+	double embedded_sys_CPU_time = (double) (g_cycle_count - previous_g_cycle_count) / (double) g_embedded_sys_freq;
+	finish = std::chrono::high_resolution_clock::now();
+	double wall_clock_time = (double) (std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() * pow(10, -9));
+	double sleep_time = embedded_sys_CPU_time - wall_clock_time;
 	if (sleep_time > 0) {
-		//std::cout << "Sleep Time: " << sleep_time << std::endl;
-		Sleep((sleep_time) * 1000);
+		auto sleep_start = std::chrono::high_resolution_clock::now();
+		auto sleep_finish = std::chrono::high_resolution_clock::now();
+		double time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+		while (time_slept < sleep_time) {
+			 sleep_finish = std::chrono::high_resolution_clock::now();
+			 time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+		}
 	}
-	previous_CPU_time = host_CPU_time;
+	start = std::chrono::high_resolution_clock::now();
+	previous_g_cycle_count = g_cycle_count;
+	supervisor_threshold += supervisor_increment;
 	std::cout << "Sleep Time: " << sleep_time << std::endl;
-	//std::cout << "Host CPU TIME: " << CPU_time_bt_call << std::endl;
-	//std::cout << "Embedded CPU Time: " << embedded_sys_CPU_time << std::endl;
-	//std::cout << "Cycle Count: " << g_cycle_count << std::endl;
-	//std::cout << "Embedded System Freq: " << g_embedded_sys_freq << std::endl;
-	g_cycle_count = 0;
 
 }
 
+void SLEEP(double seconds){
+	auto sleep_start = std::chrono::high_resolution_clock::now();
+	auto sleep_finish = std::chrono::high_resolution_clock::now();
+	double time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+	while (time_slept < seconds) {
+		sleep_finish = std::chrono::high_resolution_clock::now();
+		time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+}
+
+}
+//The init_clocks function in _startup.c
+//has 4 while loops, it waits specifically for these sequence of numbers
+//without these stores, the program will enter an infinite loop.
+void set_init_clock(){
+	STRB_2(0,0x40064006);
+	SLEEP(.2);
+	STRB_2(8,0x40064006);
+	SLEEP(.2);
+	// This number is the 32-bit inversion of the number 64
+	STRB_2(4294967263,0x40064006);
+	SLEEP(1);
+	STRB_2(0xC,0x40064006);
+}
