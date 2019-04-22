@@ -579,11 +579,11 @@ if (reg_vector & (1 << 0)) {\
 	Rd = (0xFFFF & Rm);\
 	g_cycle_count += 1;\
 }
-#define MRS( Rn, Co){\
+#define MRS_2( Rn, Co){\
 	Rn=Co;\
 	g_cycle_count+=1;\
 }
-#define MSR(Co, Rn){\
+#define MSR_2(Co, Rn){\
 	Co=Rn;\
 	g_cycle_count+=1;\
 }
