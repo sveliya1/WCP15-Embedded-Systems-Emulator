@@ -1,0 +1,119 @@
+
+
+//All addresses are 0 addressable, add 1 to all of their sizes
+#define FLASH_START 0x00000000
+#define FLASH_SIZE 0x07FFFFFF+1
+#define RAM_START 0x1FFFF000
+#define RAM_SIZE 0x20002FFF+1-RAM_START
+#define AIPS_START 0x40000000
+#define AIPS_SIZE 0x4007FFFF+1-AIPS_START
+
+#define GPIO_START 0x400FF000 
+#define GPIO_SIZE 0x400FFFFF+1-GPIO_START
+
+#define PRIVATE_PERI_START 0xE0000000
+#define PRIVATE_SIZE 0xE00FFFFF+1 - PRIVATE_PERI_START
+
+uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result, PRIMASK = 0;
+
+uint64_t g_embedded_sys_freq = 48000000;
+uint64_t supervisor_threshold =  0.5*g_embedded_sys_freq;
+uint64_t supervisor_increment = supervisor_threshold;
+
+uint8_t lsb_byte;
+uint64_t g_cycle_count;
+uint32_t lsb_word;
+bool N_flag, C_flag, Z_flag, V_flag;
+MemoryMap* map = new MemoryMap();
+RAMDevice* gpio = new RAMDevice(GPIO_START, GPIO_SIZE, ENDIAN_LITTLE);
+RAMDevice* aips = new RAMDevice(AIPS_START, AIPS_SIZE, ENDIAN_LITTLE);
+RAMDevice* ram = new RAMDevice(RAM_START, RAM_SIZE, ENDIAN_LITTLE);
+RAMDevice* private_peri = new RAMDevice(PRIVATE_PERI_START, PRIVATE_SIZE, ENDIAN_LITTLE);
+ROMDevice* flash = new ROMDevice(FLASH_START, FLASH_SIZE, ENDIAN_LITTLE);
+
+void supervisor();
+uint32_t read_register(uint32_t address, uint32_t bit_value);
+void clear_register(uint32_t address, uint32_t value);
+void set_register(uint32_t address, uint32_t value);
+void toggle_register(uint32_t address, uint32_t value);
+void set_init_clock();
+void SLEEP(double seconds);
+
+auto start = std::chrono::high_resolution_clock::now();
+auto finish= std::chrono::high_resolution_clock::now();
+
+void clear_register(uint32_t address, uint32_t value)
+{
+	uint64_t port_reg = map->read(address, Size::WORD);
+	port_reg &= ~value;
+	map->write(address, (uint32_t)port_reg, Size::WORD);
+}
+void set_register(uint32_t address, uint32_t value)
+{
+	uint64_t port_reg = map->read(address, Size::WORD);
+	port_reg |= value;
+	map->write(address, (uint32_t)port_reg, Size::WORD);
+}
+
+void toggle_register(uint32_t address, uint32_t value)
+{
+	uint64_t port_reg = map->read(address, Size::WORD);
+	port_reg ^= value;
+	map->write(address, (uint32_t)port_reg, Size::WORD);
+}
+
+
+uint32_t read_register(uint32_t address, uint32_t bit_value)
+{
+	uint32_t register_value = map->read(address, Size::WORD);
+	register_value &= ((1uL << bit_value));
+	register_value = (register_value >> bit_value);
+	return register_value;
+}
+
+void supervisor() {
+
+	static uint64_t previous_g_cycle_count = 0;
+	double embedded_sys_CPU_time = (double) (g_cycle_count - previous_g_cycle_count) / (double) g_embedded_sys_freq;
+	finish = std::chrono::high_resolution_clock::now();
+	double wall_clock_time = (double) (std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() * pow(10, -9));
+	double sleep_time = embedded_sys_CPU_time - wall_clock_time;
+	if (sleep_time > 0) {
+		auto sleep_start = std::chrono::high_resolution_clock::now();
+		auto sleep_finish = std::chrono::high_resolution_clock::now();
+		double time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+		while (time_slept < sleep_time) {
+			 sleep_finish = std::chrono::high_resolution_clock::now();
+			 time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+		}
+	}
+	start = std::chrono::high_resolution_clock::now();
+	previous_g_cycle_count = g_cycle_count;
+	supervisor_threshold += supervisor_increment;
+	std::cout << "Sleep Time: " << sleep_time << std::endl;
+
+}
+
+void SLEEP(double seconds){
+	auto sleep_start = std::chrono::high_resolution_clock::now();
+	auto sleep_finish = std::chrono::high_resolution_clock::now();
+	double time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+	while (time_slept < seconds) {
+		sleep_finish = std::chrono::high_resolution_clock::now();
+		time_slept = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(sleep_finish - sleep_start).count() * pow(10, -9));
+}
+
+}
+//The init_clocks function in _startup.c
+//has 4 while loops, it waits specifically for these sequence of numbers
+//without these stores, the program will enter an infinite loop.
+void set_init_clock(){
+	STRB_2(0,0x40064006);
+	SLEEP(.2);
+	STRB_2(8,0x40064006);
+	SLEEP(.2);
+	// This number is the 32-bit inversion of the number 64
+	STRB_2(4294967263,0x40064006);
+	SLEEP(1);
+	STRB_2(0xC,0x40064006);
+}
