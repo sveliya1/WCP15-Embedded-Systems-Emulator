@@ -14,7 +14,7 @@
 #define PRIVATE_PERI_START 0xE0000000
 #define PRIVATE_SIZE 0xE00FFFFF+1 - PRIVATE_PERI_START
 
-uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result = 0;
+uint64_t R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, SP, LR, PC, result, PRIMASK = 0;
 
 uint64_t g_embedded_sys_freq = 48000000;
 uint64_t supervisor_threshold =  0.5*g_embedded_sys_freq;
