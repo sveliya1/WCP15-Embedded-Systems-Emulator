@@ -5,6 +5,27 @@
       "Thread Name": "led",
       "ISR": "None"
 
-    }
+    },
+	
+	{
+      "Header_file": "switch_interrupt.h",
+      "Thread Function": "std::thread switch_button(check_button_INT,map)",
+      "Thread Name": "switch_button",
+	  "Condition": "BUTTON",
+      "IRQHandler": "PORTA_IRQHandler();",
+	  "Clean_Up": "BUTTON=false;"
+
+    },
+	
+	{
+	  "Header_file": "TSI.h",
+      "Thread Function": "std::thread TSI_thread(TSI_INT,map)",
+      "Thread Name": "TSI_thread",
+	  "Condition": "TSI",
+      "IRQHandler": "PORTB_IRQHandler();",
+	  "Clean_Up": "TSI=false;"
+	
+	
+	}
 ]
 

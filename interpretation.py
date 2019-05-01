@@ -8,6 +8,26 @@ def BLInsert(line, BLIndex):
 			return subString[1:-1]+"( "
 	return "//ERROR PARSING BL "
 
+def createISR():
+	includesJSON = ""
+	with open("hardware_features.json", 'r') as includeFile: 
+		jsonText = includeFile.read()             #convert the file into a string
+		includesJson = json.loads(jsonText) 
+	ISR = "\nvoid ISR()\n{\nif (INTERRUPT_ENABLE && !PRIMASK) {\n"
+	ifStatement = "if("
+	for listObj in includesJson:
+		toWrite = ""
+		if("Condition" in listObj.keys()):
+			toWrite += ifStatement + listObj["Condition"] + ") {\n"
+			toWrite += listObj["IRQHandler"] + "\n"
+			if("Clean_Up" in listObj.keys()):
+				toWrite += listObj["Clean_Up"] + "\n}\n"
+			ifStatement = "else if(" #Change the if to an else if
+		if(toWrite != ""):
+			ISR += toWrite
+	ISR += "}\n"
+	return ISR
+
 def GetIncludes():
 	includesJSON = ""
 	toReturn = ""
@@ -25,18 +45,7 @@ def GetThreads():
 		jsonText = includeFile.read()             #convert the file into a string
 		includesJson = json.loads(jsonText)   
 	for listObj in includesJson:
-		toReturn += listObj["Thread Function"] + ";\n"
-	return toReturn
-
-def GetISR():
-	includesJSON = ""
-	toReturn = ""
-	with open("hardware_features.json", 'r') as includeFile: 
-		jsonText = includeFile.read()             #convert the file into a string
-		includesJson = json.loads(jsonText)   
-	for listObj in includesJson:
-		if(listObj["ISR"] != "None"):
-			toReturn += listObj["ISR"] + "\n"
+		toReturn += listObj["Thread Function"] + "\n"
 	return toReturn
 
 def BranchInsert(line, BIndex):
@@ -234,14 +243,16 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.write("#include <stdio.h>\n#include <math.h>\n#include <iostream>\n#include <thread>\n#include <mutex>\n#include \"memorymap.h\"\n#include \"flash.h\"\n#include \"macros.h\"\n#include \"IO_Register.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#include <chrono>\n")
 		interprettedFile.write(GetIncludes())
 		interprettedFile.write(functionDec)
+		
 		interprettedFile.write("void ISR();")
-		interprettedFile.write("\nvoid ISR()\n{\n")
-		interprettedFile.write(GetISR())
-		interprettedFile.write("}\n")
+		#interprettedFile.write("\nvoid ISR()\n{\n")
+		interprettedFile.write(createISR())
+		#interprettedFile.write(GetISR())
+		#interprettedFile.write("}\n")
 		interprettedFile.write(head)
 		threads = GetThreads()
 		threads = threads + "std::thread last_hope(set_init_clock);\n"
-		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\nburn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\nSP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n" + threads+ "_reset_init();\n")
+		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\nburn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\nSP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n" + threads + "_reset_init();\n")
 
 		#interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, LR, pc, result;\n")
 		#interprettedFile.write("bool V_flag =  false;\n")
@@ -255,119 +266,3 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.write(content)
 json_file.close()
 assembly_file.close()
-
-
-#def getReplaceValue(toReplace,originalSplit):
-#    toReplaceOriginal = toReplace
-# #   try:
-#    if("ADDRESS" in toReplace):
-#        toReplace = re.sub('[^0-9a-zA-Z]',"",originalSplit[0])
-#    elif("FUNCTION" in toReplace):
-#        for subString in originalSplit:
-#            if "<" in subString:
-#                toReplace = re.sub("<","",subString)
-#                toReplace = re.sub(">","",toReplace)
-#                toReplace += "()"
-#    elif("A" in toReplace):
-#        index = toReplace.replace("A","")
-#        toReplace = re.sub('[^0-9a-zA-Z]',"",originalSplit[int(re.sub('[^0-9]','',index)) + 2])
-#    elif("S" in toReplace):
-#        toReplace = toReplace.replace("S","")
-#        toAddValues = map(int, toReplace.split("_"))
-#        total = "("
-#        for index in toAddValues:
-#            index = index + 1
-#            #= re.sub(r'([^\s\w]|_)+', ' ', line)
-#            totalString = originalSplit[(int)(index)]
-#            if("pc" in totalString):
-#                total = total +str(int(re.sub('[^\w]','',originalSplit[0]),16))
-#            else:
-#                if("r" in originalSplit[index]):
-#                    total = total + (re.sub('[^0-9a-zA-Z]','',originalSplit[index]))
-#                else:
-#                    total = total + (re.sub('[^0-9]','',totalString))
-#            total += "+"
-#        total += "0)"   #this is a bad solution to the code leaving a trailing + at the end of the string
-#        toReplace = (total)
-##    except:#failed to parse for any reason
-#        #toReplace = toReplaceOriginal
-#    return str(toReplace) + " "
-
-
-
-
-#json_file = open("commandsJSON.json")   
-#json_str = json_file.read()             #convert the file into a string
-#json_data = json.loads(json_str)        #convert the string into a dict, by loading the json data.
-#assembly_file = open("timing_demo.txt", "r")
-#interprettedFile = open("parsed.c","w")
-#interprettedFile.write("#include <stdint.h>\n#include <stdio.h>\n#include <iostream>\n#include \"memorymap.h\"\n#ifdef _WIN32\n#include <windows.h>\n#endif\n#define DEBUG 1\n")
-#interprettedFile.write("uint8_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16;\n")
-#interprettedFile.write("int result = 0;\n")
-#interprettedFile.write("int Memory[2048];\n")
-#interprettedFile.write("void filler(){\ngoto main;")
-#for line in assembly_file:
-#    #try:
-#        #lineAlphaNumeric = re.sub(r'([^\s\w]|_)+', ' ', line) #remove
-#        #non-alphanumeric/space characters
-#        #splitValues = lineAlphaNumeric.split()
-#        splitValues = line.split()
-#        if(len(splitValues) <= 1):
-#            interprettedFile.write("\n") 
-#            continue
-#        if("<" not in splitValues[1]):
-#            interprettedFile.write(splitValues[0]+" \n")
-#        # Detect Function Header Format: <Function_Header>
-#        if("<" in splitValues[1]):
-#            labelHeader = splitValues[1].replace("<","") 
-#            labelHeader = labelHeader.replace(">:","")
-#            labelHeader = "}\nvoid " + labelHeader + "() {"
-#            interprettedFile.write(labelHeader)
-#            interprettedFile.write("\n")
-#        elif(len(splitValues) < 3):
-#            interprettedFile.write("// could not parse: " + line)
-#        elif(splitValues[2].upper() in json_data):
-#            assemblyToCSplit = json_data.get(splitValues[2].upper()).split()
-#            #assemblyToC = assemblyToCSplit[0]+": \n"
-#            assemblyToC = "\t"
-#            #assemblyToC = splitValues[2] + " "
-            
-#            for toParse in assemblyToCSplit:
-#                assemblyToC += getReplaceValue(toParse,splitValues)
-#            #if(len(splitValues) >= 4):
-#            #    assemblyToC = assemblyToC.replace('A1',splitValues[3])
-#            #if(len(splitValues) >= 5):
-#            #    if(splitValues[4].contains("#")):
-#            #        assemblyToC =
-#            #        assemblyToC.replace('A2',splitValues[3].replace("#",""))
-#            #    else:
-#            #        assemblyToC = assemblyToC.replace('A2',splitValues[3])
-#            interprettedFile.write(assemblyToC)
-#            interprettedFile.write("//" + line)
-#        elif(len(splitValues) < 4):
-#            interprettedFile.write("// could not parse: " + line)
-#        elif(splitValues[3].upper() in json_data):
-#            assemblyToCSplit = json_data.get(splitValues[3].upper()).split()
-#            assemblyToC = "\t"
-#            #assemblyToC = splitValues[2] + " "
-#            for toParse in assemblyToCSplit:
-#                assemblyToC += getReplaceValue(toParse,splitValues)
-#            #if(len(splitValues) >= 4):
-#            #    assemblyToC = assemblyToC.replace('A1',splitValues[3])
-#            #if(len(splitValues) >= 5):
-#            #    if(splitValues[4].contains("#")):
-#            #        assemblyToC =
-#            #        assemblyToC.replace('A2',splitValues[3].replace("#",""))
-#            #    else:
-#            #        assemblyToC = assemblyToC.replace('A2',splitValues[3])
-#            interprettedFile.write(assemblyToC)
-#            interprettedFile.write("//" + line)
-#        else:
-#            interprettedFile.write("// could not parse: " + line)
-#            #interprettedFile.write("\n")
-#    #except:
-#     #   interprettedFile.write("// could not parse: " + line)
-#interprettedFile.write("}")
-#interprettedFile.close()
-#json_file.close()
-#assembly_file.close()
