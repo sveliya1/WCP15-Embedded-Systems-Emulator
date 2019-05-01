@@ -56,11 +56,18 @@ def findLine(lineNumber):
 	global assemblyContents
 	for line in assemblyContents:
 		try:
-			if(line.split()[0] == (lineNumber.replace("(","")+":")):
+			if(line.split()[0].rstrip(":") == (lineNumber.replace("(",""))):
 				return line
 		except:
 			pass
 	return ""
+
+def StartingLocation():
+	locationLine = findLine("0").split()
+	startingLine = locationLine[8] + locationLine[7] + locationLine[6] + locationLine[5]
+	line = findLine((hex(int(startingLine,16)-1)).lstrip("0x").rstrip("L").zfill(8)).split()
+	startingFunction = line[1].replace("<","").replace(">","").replace(":","") + "();"
+	return startingFunction.lstrip("0")
 	
 startName = ""
 
@@ -252,7 +259,8 @@ with open("parsed.cpp", 'r+') as interprettedFile:
 		interprettedFile.write(head)
 		threads = GetThreads()
 		threads = threads + "std::thread last_hope(set_init_clock);\n"
-		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\nburn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\nSP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n" + threads + "_reset_init();\n")
+		interprettedFile.write("void main()\n{\nstd::cout << \"Hello\" << std::endl;\nmap->addDevice(flash);\nmap->addDevice(ram);\nmap->addDevice(aips);\nmap->addDevice(gpio);\nmap->addDevice(private_peri);\nburn_flash_to_mem(flash);\nstd::cout << \"Memory Allocate is good\" << std::endl;\nSP = init_sp();\nstart = std::chrono::high_resolution_clock::now();\n" + threads)
+		interprettedFile.write(StartingLocation() + "\n")
 
 		#interprettedFile.write("uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, sp, LR, pc, result;\n")
 		#interprettedFile.write("bool V_flag =  false;\n")
