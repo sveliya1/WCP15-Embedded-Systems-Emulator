@@ -201,36 +201,42 @@ if (reg_vector & (1 << 0)) {\
 reg = map -> read(address, Size::WORD);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define LDRB_2(reg,address){\
 reg = map -> read(address, Size::BYTE);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define LDRH_2(reg,address){\
 reg = map -> read(address, Size::HALF_WORD);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define LDR_3(reg,rg_addr, offset){\
 reg = map -> read((uint32_t)(rg_addr+offset), Size::WORD);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define LDRB_3(reg,rg_addr,offset){\
 reg = map -> read((unsigned)(rg_addr+offset), Size::BYTE);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define LDRH_3(reg,address){\
 reg = map -> read((rg_addr+offset), Size::HALF_WORD);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define LSRS_2(Rd,Rn){\
@@ -362,41 +368,41 @@ if (reg_vector & (1 << 0)) {\
 }\
 }
 #define POP(SP, reg_vector){\
-if (reg_vector & (1 << 8)) {\
-		LDR_2(R0, SP); \
+if (reg_vector & (1 << 0)) {\
 		SP += 4; \
-}\
-if (reg_vector & (1 << 7)) {\
-		LDR_2(R1, SP); \
-		SP += 4; \
-}\
-if (reg_vector & (1 << 6)) {\
-		LDR_2(R2, SP); \
-		SP += 4; \
-}\
-if (reg_vector & (1 << 5)) {\
-		LDR_2(R3, SP); \
-		SP += 4; \
-}\
-if (reg_vector & (1 << 4)) {\
-		LDR_2(R4, SP); \
-		SP += 4; \
-}\
-if (reg_vector & (1 << 3)) {\
-		LDR_2(R5, SP); \
-		SP += 4; \
-}\
-if (reg_vector & (1 << 2)) {\
-		LDR_2(R6, SP); \
-		SP += 4; \
+		LDR_2(PC, SP); \
 }\
 if (reg_vector & (1 << 1)) {\
+		SP += 4; \
 		LDR_2(R7, SP); \
-		SP += 4; \
 }\
-if (reg_vector & (1 << 0)) {\
-		LDR_2(PC, SP); \
+if (reg_vector & (1 << 2)) {\
 		SP += 4; \
+		LDR_2(R6, SP); \
+}\
+if (reg_vector & (1 << 3)) {\
+		SP += 4; \
+		LDR_2(R5, SP); \
+}\
+if (reg_vector & (1 << 4)) {\
+		SP += 4; \
+		LDR_2(R4, SP); \
+}\
+if (reg_vector & (1 << 5)) {\
+		SP += 4; \
+		LDR_2(R3, SP); \
+}\
+if (reg_vector & (1 << 6)) {\
+		SP += 4; \
+		LDR_2(R2, SP); \
+}\
+if (reg_vector & (1 << 7)) {\
+		SP += 4; \
+		LDR_2(R1, SP); \
+}\
+if (reg_vector & (1 << 8)) {\
+		SP += 4; \
+		LDR_2(R0, SP); \
 }\
 }
 #define RORS_2(Rd,Rn){\
@@ -479,36 +485,42 @@ g_cycle_count += 1;\
  io_write(address,value);\
 if (g_cycle_count > supervisor_threshold)\
  supervisor();\
+ ISR();\
 g_cycle_count += 2;\
 }
 #define STRB_2(value, address){\
  map -> write(address, (unsigned) value, Size::BYTE);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define STRH_2(value, address){\
  map -> write(address, (unsigned) value, Size::HALF_WORD);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define STR_3(value, reg, offset){\
  io_write((reg+offset),value);\
 if (g_cycle_count > supervisor_threshold)\
  supervisor();\
+ ISR();\
 g_cycle_count += 2;\
 }
 #define STRB_3(value, reg, offset){\
  map -> write((unsigned)(reg+offset), value, Size::BYTE);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define STRH_3(value, reg, offset){\
  map -> write((unsigned)(reg+offset), value, Size::HALF_WORD);\
 if (g_cycle_count > supervisor_threshold)\
 supervisor();\
+ISR();\
 g_cycle_count += 2;\
 }
 #define STMIA(base_reg, reg_vector) {\
@@ -587,3 +599,32 @@ if (reg_vector & (1 << 0)) {\
 	Co=Rn;\
 	g_cycle_count+=1;\
 }
+
+//Need to double check the g_cycle_count on this
+#define REV_2(Rd, Rn){\
+	Rd = ((Rn >> 24) | (Rn << 24) | ((Rn & 0x00FF0000) >> 8) | ((Rn & 0x0000FF00) << 8));\
+	g_cycle_count += 1;\
+}
+#define NEGS_2(Rd,Rn){\
+	MVN_2(Rd,Rn);\
+}
+//Arg are dummy variables, made an assumption that it takes one cycle to do. 
+#define CPSID_1(arg){\
+	INTERRUPT_ENABLE = false;\
+	g_cycle_count += 1;\
+}
+#define CPSIE_1(arg){\
+	INTERRUPT_ENABLE=true;\
+	g_cycle_count += 1;\
+}
+
+/*
+#define CPSID_1(arg){\
+	INTERRUPT_ENABLE = false;\
+	g_cycle_count += 1;\ 
+}
+#define CPSIE_1(arg){\
+	INTERRUPT_ENABLE = true;\
+	g_cycle_count += 1;\ 
+}
+*/
